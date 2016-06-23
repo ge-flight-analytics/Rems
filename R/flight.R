@@ -26,7 +26,8 @@ search_fields <-
       if ( length(f) == 1 ) {
         # Single keyword case
         f  <- tolower(f)
-        df <- subset(flt$tree, (nodetype=='field') & grepl(f, tolower(name)))
+        names <- tolower(flt$tree$name)
+        df <- subset(flt$tree, (nodetype=='field') & ((f==names) | grepl(f, names)) )
         df <- df[order(nchar(df$name)), ]
         res[[length(res)+1]] <- as.list(df[1,])
 
@@ -35,11 +36,12 @@ search_fields <-
         f  <- tolower(f)
         chld <- flt$tree
         for ( i in seq_along(f) ) {
-          node_id <- chld[grep(f[i], tolower(chld$name)), 'id']
+          names   <- tolower(chld$name)
+          node_id <- chld[(f[i]==names) | grep(f[i], names), 'id']
           if (i < length(f)) {
             chld    <- subset(flt$tree, parent %in% node_id)
           } else {
-            chld    <- subset(chld, (nodetype=='field') & grepl(f[length(f)], tolower(name)))
+            chld    <- subset(chld, (nodetype=='field') & ((f[i]==names) | grepl(f[i], names)) )
           }
         }
         res[[length(res)+1]] <- as.list( chld[order(nchar(chld$name))[1], ] )
@@ -297,7 +299,8 @@ update_tree <-
     for ( i in seq_along(tolower(path)) ) {
 
       if (i == 1) {
-        prnt <- subset(flt$tree, grepl(path[i], tolower(name)))
+        names<- tolower(flt$tree$name)
+        prnt <- subset(flt$tree, (path[i]==names) | grepl(path[i], names))
         if (nrow(prnt) == 0) {
           stop(sprintf("Search keyword '%s' did not return any field group. Please check if the keyword is valid.", path[i]))
         }
@@ -307,7 +310,8 @@ update_tree <-
       } else {
         flt     <- update_children(flt, prnt)
         chld_df <- get_children_df(flt, prnt$id)
-        chld    <- subset(chld_df, grepl(path[i], tolower(name)))
+        names   <- tolower(chld_df$name)
+        chld    <- subset(chld_df, (path[i]==names) | grepl(path[i], names))
         if (nrow(chld) == 0) {
           stop(sprintf("Search keyword '%s' did not return any field group. Please check if the keyword is valid.", path[i]))
         }

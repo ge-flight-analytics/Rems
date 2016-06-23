@@ -242,7 +242,7 @@ to_dataframe <-
                                format = "%Y-%m-%dT%H:%M:%S")
       } else if ( coltype[i] == "discrete" ) {
         k_map <- list_allvalues(qry$flight, field_id = col_id[i], in_list = T)
-        df[ , i] <- sapply(as.integer(df[ , i]), function(k) k_map[[k]])
+        df[ , i] <- sapply(df[ , i], function(k) k_map[[k]])
       } else if ( coltype[i] == "boolean") {
         df[ , i] <- as.logical(as.integer(df[ , i]))
       }
@@ -359,8 +359,9 @@ datetime_filter <-
 ## --------------------------------------------------------------------------
 ## Functions to interface with the flight object
 update_datatree <-
-  function(qry, path)
+  function(qry, ...)
   {
+    path <- unlist(list(...))
     qry$flight <- update_tree(qry$flight, path)
     return(qry)
   }
