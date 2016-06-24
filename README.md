@@ -50,6 +50,7 @@ The EMS system handles with data fields based on a hierarchical tree structure. 
 * Data Information
 * Navigation Information
 * Weather Information
+
  In case that you want to query with fields that are not included in this default, stripped-down data tree, you'll have to add the field group where your fields belongs to and update your data field tree. For example, if you want to add a field group branch such as Profiles --> Standard Library Profiles --> Block-Cost Model --> P301: Block-Cost Model Planned Fuel Setup and Tests --> Measured Items --> Ground Operations (before takeoff), the execution of the following method will add the fields and their related subtree structure to the basic tree structure. You can use either the full name or just a fraction of consequtive keywords of each field group. The keyword is case insenstive.
  
  **Caution**: the process of adding a subtree usually requires a very large number of recursive RESTful API calls which takes quite a long time. Please try to specify the subtree to as low level as possible to avoid a long processing time.
@@ -124,10 +125,10 @@ qry <- get_top(qry, 5000)
 ### Filtering
 
 Currently the following conditional operators are supported with respect to the data field types:
-    - Number: "==", "!=", "<", "<=", ">", ">="
-    - Discrete: "==", "!=", "in", "not in" (Filtering condition made with value, not discrete integer key)
-    - Boolean: "==", "!="
-    - String: "==", "!=", "in", "not in"
+    * Number: "==", "!=", "<", "<=", ">", ">="
+    * Discrete: "==", "!=", "in", "not in" (Filtering condition made with value, not discrete integer key)
+    * Boolean: "==", "!="
+    * String: "==", "!=", "in", "not in"
 
 Following is the example:
 ```r
@@ -137,11 +138,11 @@ qry <- filter(qry, "'customer id' in c('CQH', 'EVA')")
 qry <- filter(qry, "'takeoff airport code' == 'TPE'")
 ```
 The current filter method has the following limitation:
-- Single filtering condition for each filter method call
-- Each filtering condition is combined only by "AND" relationship
-- The field keyword must be at left-hand side of a conditional expression
-- No support of NULL value filtering, which is being worked on now
-- The datetime condition should be only with the ISO8601 format
+* Single filtering condition for each filter method call
+* Each filtering condition is combined only by "AND" relationship
+* The field keyword must be at left-hand side of a conditional expression
+* No support of NULL value filtering, which is being worked on now
+* The datetime condition should be only with the ISO8601 format
 
 ## Checking the Generated JSON Query
 
