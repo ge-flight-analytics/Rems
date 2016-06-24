@@ -281,6 +281,12 @@ This will print the following JSON string:
 ##   }
 ## }
 ```
+## Reset Query
+In case you want to start over for a fresh new query,
+```r
+reset(qry)
+```
+Which will erase all the previous query settings.
 
 ## Finally, Run the Query
 
