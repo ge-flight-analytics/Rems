@@ -1,5 +1,5 @@
 # Rems
-Rems is a R wrapper of EMS database API. With Rems package, you will be able to retrieve the EMS data from R without the low-level knowledge of the EMS RESTful API. The project is still in very early alpha stage, so is not guarranteed working reliably nor well documented. I'll beef up the documentation as soon as possible. 
+Rems is a R wrapper of EMS database API. With Rems package, you will be able to retrieve the EMS data from R without low-level knowledge of the EMS RESTful API. The project is still in very early alpha stage, so is not guarranteed working reliably nor well documented. I'll beef up the documentation as soon as possible. 
 
 Any contribution is welcome!
 
@@ -58,7 +58,7 @@ The EMS system handles with data fields based on a hierarchical tree structure. 
 * Navigation Information
 * Weather Information
 
-In case that you want to query with fields that are not included in this default, stripped-down data tree, you'll have to add the field group where your fields belongs to and update your data field tree. For example, if you want to add a field group branch such as Profiles --> Standard Library Profiles --> Block-Cost Model --> P301: Block-Cost Model Planned Fuel Setup and Tests --> Measured Items --> Ground Operations (before takeoff), the execution of the following method will add the fields and their related subtree structure to the basic tree structure. You can use either the full name or just a fraction of consequtive keywords of each field group. The keyword is case insenstive.
+In case that you want to query with fields that are not included in this default, stripped-down data tree, you'll have to add the field group where your fields belongs to and update your data field tree. For example, if you want to add a field group branch such as Profiles --> Standard Library Profiles --> Block-Cost Model --> P301: Block-Cost Model Planned Fuel Setup and Tests --> Measured Items --> Ground Operations (before takeoff), the execution of the following method will add the fields and their related subtree structure to the basic tree structure. You can use either the full name or just a fraction of consequtive keywords of each field group. The keyword is case insensitive.
  
 **Caution**: the process of adding a subtree usually requires a very large number of recursive RESTful API calls which takes quite a long time. Please try to specify the subtree to as low level as possible to avoid a long processing time.
  
