@@ -5,7 +5,7 @@
 #' @param pwd String, FOQA password
 #' @param proxies List containing the system proxy information. The list contains attributes "url", "port", "usr", "pwd"
 #' @return a Connection object.
-
+#' @export
 connect <-
   function(usr, pwd, proxies = NULL)
   {
@@ -40,13 +40,12 @@ connect <-
     c
   }
 
-
+#' @export
 reconnect <-
   function(conn)
   {
     return(connect(conn$foqa$usr, conn$foqa$pwd, proxies = conn$proxies))
   }
-
 
 
 request <-

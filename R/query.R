@@ -7,6 +7,7 @@ sp_ops <- list(
   ' not in '= 'notIn'
 )
 
+#' @export
 query <-
   function(conn, ems_name)
   {
@@ -27,7 +28,7 @@ query <-
     return(obj)
   }
 
-
+#' @export
 reset <-
   function(qry)
   {
@@ -42,7 +43,7 @@ reset <-
     qry
   }
 
-
+#' @export
 select <-
   function(qry, ..., aggregate = c('none','avg','count','max','min','stdev','sum','var'))
   {
@@ -63,7 +64,7 @@ select <-
     return(qry)
   }
 
-
+#' @export
 group_by <-
   function(qry, ...)
   {
@@ -74,7 +75,7 @@ group_by <-
     return(qry)
   }
 
-
+#' @export
 order_by <-
   function(qry, field, order = c('asc', 'desc'))
   {
@@ -87,7 +88,7 @@ order_by <-
     return(qry)
   }
 
-
+#' @export
 filter <-
   function(qry, expr)
   {
@@ -152,7 +153,7 @@ translate_expr <-
     return(fltr)
   }
 
-
+#' @export
 distinct <-
   function(qry, d = TRUE)
   {
@@ -160,7 +161,7 @@ distinct <-
     return(qry)
   }
 
-
+#' @export
 get_top <-
   function(qry, n)
   {
@@ -184,14 +185,14 @@ get_top <-
 #     return(qry)
 #   }
 
-
+#' @export
 json_str <-
   function(qry)
   {
     jsonlite::toJSON(qry$queryset, auto_unbox = T, pretty = T)
   }
 
-
+#' @export
 run <-
   function(qry, output = c("dataframe", "raw"))
   {
@@ -358,6 +359,8 @@ datetime_filter <-
 
 ## --------------------------------------------------------------------------
 ## Functions to interface with the flight object
+
+#' @export
 update_datatree <-
   function(qry, ...)
   {
@@ -366,12 +369,14 @@ update_datatree <-
     return(qry)
   }
 
+#' @export
 save_datatree <-
   function(qry, file_name = NULL)
   {
     save_tree(qry$flight, file_name)
   }
 
+#' @export
 load_datatree <-
   function(qry, file_name = NULL)
   {
