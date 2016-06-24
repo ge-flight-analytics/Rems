@@ -125,10 +125,10 @@ qry <- get_top(qry, 5000)
 ### Filtering
 
 Currently the following conditional operators are supported with respect to the data field types:
-    * Number: "==", "!=", "<", "<=", ">", ">="
-    * Discrete: "==", "!=", "in", "not in" (Filtering condition made with value, not discrete integer key)
-    * Boolean: "==", "!="
-    * String: "==", "!=", "in", "not in"
+* Number: "==", "!=", "<", "<=", ">", ">="
+* Discrete: "==", "!=", "in", "not in" (Filtering condition made with value, not discrete integer key)
+* Boolean: "==", "!="
+* String: "==", "!=", "in", "not in"
 
 Following is the example:
 ```r
