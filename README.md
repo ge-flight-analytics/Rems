@@ -119,10 +119,10 @@ qry <- order_by(qry, "flight date")
 
 ### Additional Conditions
 
-If you want to get unique rows only,
+If you want to get unique rows only (which is already set on as default),
 ```r
 qry <- distinct(qry) # identical with distinct(qry, TRUE)
-# If you want to turn of distinct, do qry <- distinct(qry, FALSE)
+# If you want to turn off "distinct", do qry <- distinct(qry, FALSE)
 ```
 Also you can control the number of rows that will be returned. The current EMS API is limited to return maximum of 5000 rows. Any greater number will be truncated to 5000 rows.
 ```r
