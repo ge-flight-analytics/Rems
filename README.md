@@ -5,6 +5,11 @@ Any contribution is welcome!
 
 Dependency: httr, jsonlite
 
+## Installation
+```r
+install.package("devtools")
+devtools::install_git("https://github.build.ge.com/212401522/Rems")
+```
 ## Connect to EMS
 <!-- <http://rmarkdown.rstudio.com>**Knit**`echo = FALSE` -->
 
