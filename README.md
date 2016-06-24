@@ -41,6 +41,7 @@ conn <- connect({efoqa_usr},
 qry <- query(conn, "ems9")
 ```
 Current limitations:
+
 * The current query object only support the FDW Flight data source, which seems to be reasonable for POC functionality.
 * Right now a query can be instantiated only with a single EMS system connection. I think a query object with multi-EMS connection could be quite useful for data analysts who want to do study pseudo-global patterns.
     + Ex) query = Query(c, ems_name = c('ems9', 'ems10', 'ems11'))
@@ -48,7 +49,8 @@ Current limitations:
 
 ## Datasource Setup
 
-The EMS system handles with data fields based on a hierarchical tree structure. This field tree manages the names and field ID mappings as well as the field groups of fields. In order to send query via EMS API, the Rems package already contains a data file for the static and frequently used part of the field tree as default. This bare field tree includes fields of the following field groups:
+The EMS system handles with data fields based on a hierarchical tree structure. This field tree manages mappings between names and field IDs as well as the field groups of fields. In order to send query via EMS API, the Rems package already contains a data file for the static, frequently used part of the field tree as default. This bare field tree includes fields of the following field groups:
+
 * Flight Information (sub-field groups Processing and Profile 16 Extra Data were excluded)
 * Aircraft Information 
 * Flight Review
@@ -56,9 +58,9 @@ The EMS system handles with data fields based on a hierarchical tree structure. 
 * Navigation Information
 * Weather Information
 
- In case that you want to query with fields that are not included in this default, stripped-down data tree, you'll have to add the field group where your fields belongs to and update your data field tree. For example, if you want to add a field group branch such as Profiles --> Standard Library Profiles --> Block-Cost Model --> P301: Block-Cost Model Planned Fuel Setup and Tests --> Measured Items --> Ground Operations (before takeoff), the execution of the following method will add the fields and their related subtree structure to the basic tree structure. You can use either the full name or just a fraction of consequtive keywords of each field group. The keyword is case insenstive.
+In case that you want to query with fields that are not included in this default, stripped-down data tree, you'll have to add the field group where your fields belongs to and update your data field tree. For example, if you want to add a field group branch such as Profiles --> Standard Library Profiles --> Block-Cost Model --> P301: Block-Cost Model Planned Fuel Setup and Tests --> Measured Items --> Ground Operations (before takeoff), the execution of the following method will add the fields and their related subtree structure to the basic tree structure. You can use either the full name or just a fraction of consequtive keywords of each field group. The keyword is case insenstive.
  
- **Caution**: the process of adding a subtree usually requires a very large number of recursive RESTful API calls which takes quite a long time. Please try to specify the subtree to as low level as possible to avoid a long processing time.
+**Caution**: the process of adding a subtree usually requires a very large number of recursive RESTful API calls which takes quite a long time. Please try to specify the subtree to as low level as possible to avoid a long processing time.
  
 ```r
 qry <- update_datatree(qry, "profiles", "standard", "block-cost", "p301", "measured", "ground operations (before takeoff)")
