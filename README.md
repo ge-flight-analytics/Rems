@@ -99,7 +99,7 @@ Select the columns to include in your query. Again you can pass consequtive word
 ```r
 qry <- select(qry, "flight date", "customer id", "takeoff valid", "takeoff airport code")
 ```
-You will have to make a seperate `select` function call if you want to aggregate a field.
+You will have to make a separate `select` function call if you want to aggregate a field.
 ```r
 qry <- select(qry,
               "P301: duration from first indication of engines running to start",
@@ -284,7 +284,7 @@ This will print the following JSON string:
 ## Reset Query
 In case you want to start over for a fresh new query,
 ```r
-reset(qry)
+qry <- reset(qry)
 ```
 Which will erase all the previous query settings.
 
