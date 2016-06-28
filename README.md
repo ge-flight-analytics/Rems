@@ -9,7 +9,7 @@ Dependency: httr, jsonlite
 
 ## Installation
 ```r
-install.package("devtools")
+install.packages("devtools")
 devtools::install_git("https://github.build.ge.com/212401522/Rems")
 ```
 ## Connect to EMS
