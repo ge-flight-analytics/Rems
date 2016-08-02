@@ -1,5 +1,7 @@
 # Rems
-Rems is a R wrapper of EMS database API. With Rems package, you will be able to retrieve the EMS data from R without the low-level knowledge of the EMS RESTful API. The project is still in very early alpha stage, so is not guarranteed working reliably nor well documented. I'll beef up the documentation as soon as possible. 
+Rems is a R wrapper of EMS database API. If you are also interested in a Python wrapper for EMS API, visit <https://github.build.ge.com/212401522/emsPy>. 
+
+With Rems package, you will be able to retrieve the EMS data from R without low-level knowledge of the EMS RESTful API. The project is still in very early alpha stage, so is not guarranteed working reliably nor well documented. I'll beef up the documentation as soon as possible. 
 
 Any contribution is welcome!
 
@@ -7,7 +9,7 @@ Dependency: httr, jsonlite
 
 ## Installation
 ```r
-install.package("devtools")
+install.packages("devtools")
 devtools::install_git("https://github.build.ge.com/212401522/Rems")
 ```
 ## Connect to EMS
@@ -49,7 +51,7 @@ Current limitations:
 
 ## Datasource Setup
 
-The EMS system handles with data fields based on a hierarchical tree structure. This field tree manages mappings between names and field IDs as well as the field groups of fields. In order to send query via EMS API, the Rems package already contains a data file for the static, frequently used part of the field tree as default. This bare field tree includes fields of the following field groups:
+The EMS system handles with data fields based on a hierarchical tree structure. This field tree manages mappings between names and field IDs as well as the field groups of fields. In order to send query via EMS API, the Rems package will automatically generate a data file for the static, frequently used part of the field tree and load it as default. This bare field tree includes fields of the following field groups:
 
 * Flight Information (sub-field groups Processing and Profile 16 Extra Data were excluded)
 * Aircraft Information 
@@ -58,7 +60,7 @@ The EMS system handles with data fields based on a hierarchical tree structure. 
 * Navigation Information
 * Weather Information
 
-In case that you want to query with fields that are not included in this default, stripped-down data tree, you'll have to add the field group where your fields belongs to and update your data field tree. For example, if you want to add a field group branch such as Profiles --> Standard Library Profiles --> Block-Cost Model --> P301: Block-Cost Model Planned Fuel Setup and Tests --> Measured Items --> Ground Operations (before takeoff), the execution of the following method will add the fields and their related subtree structure to the basic tree structure. You can use either the full name or just a fraction of consequtive keywords of each field group. The keyword is case insenstive.
+In case that you want to query with fields that are not included in this default, stripped-down data tree, you'll have to add the field group where your fields belongs to and update your data field tree. For example, if you want to add a field group branch such as Profiles --> Standard Library Profiles --> Block-Cost Model --> P301: Block-Cost Model Planned Fuel Setup and Tests --> Measured Items --> Ground Operations (before takeoff), the execution of the following method will add the fields and their related subtree structure to the basic tree structure. You can use either the full name or just a fraction of consequtive keywords of each field group. The keyword is case insensitive.
  
 **Caution**: the process of adding a subtree usually requires a very large number of recursive RESTful API calls which takes quite a long time. Please try to specify the subtree to as low level as possible to avoid a long processing time.
  
@@ -99,7 +101,7 @@ Select the columns to include in your query. Again you can pass consequtive word
 ```r
 qry <- select(qry, "flight date", "customer id", "takeoff valid", "takeoff airport code")
 ```
-You will have to make a seperate `select` function call if you want to aggregate a field.
+You will have to make a separate `select` function call if you want to aggregate a field.
 ```r
 qry <- select(qry,
               "P301: duration from first indication of engines running to start",
@@ -119,10 +121,10 @@ qry <- order_by(qry, "flight date")
 
 ### Additional Conditions
 
-If you want to get unique rows only,
+If you want to get unique rows only (which is already set on as default),
 ```r
 qry <- distinct(qry) # identical with distinct(qry, TRUE)
-# If you want to turn of distinct, do qry <- distinct(qry, FALSE)
+# If you want to turn off "distinct", do qry <- distinct(qry, FALSE)
 ```
 Also you can control the number of rows that will be returned. The current EMS API is limited to return maximum of 5000 rows. Any greater number will be truncated to 5000 rows.
 ```r
@@ -281,6 +283,12 @@ This will print the following JSON string:
 ##   }
 ## }
 ```
+## Reset Query
+In case you want to start over for a fresh new query,
+```r
+qry <- reset(qry)
+```
+Which will erase all the previous query settings.
 
 ## Finally, Run the Query
 
