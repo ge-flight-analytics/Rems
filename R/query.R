@@ -196,6 +196,7 @@ json_str <-
 run <-
   function(qry, output = c("dataframe", "raw"))
   {
+
     output <- match.arg(output)
     cat("Sending a query to EMS ...")
     r <- request(qry$connection, rtype = "POST",
@@ -234,7 +235,21 @@ to_dataframe <-
       df[i, ] <- ldata[[i]]
     }
 
+    if ( qry$queryset$format == 'display') {
+      cat('Done.\n')
+      return(df)
+    }
     # Do the dirty work of casting a right type for each column of the data
+    # Note
+    # ====
+    # Runway IDs are discrete data but their key-value mapping is not provided
+    # because the mapping itself is quite big in size (45K entries). That means
+    # the regular routines to handle the discrete data won't work. As a result
+    # the discrete data routine has a dirty, custom routine particularly for
+    # the runway IDs. What it basically does is to send a separate but redundant
+    # query for runway IDs with "queryset$format = display", and then push the
+    # this query result at the runway ID column of the original query result.
+    # I know this is crappy but it seems the best way I could find.
     for ( i in seq_along(coltype) ) {
       if ( coltype[i] == 'number' ) {
         df[ , i] <- as.numeric(df[ , i])
@@ -243,7 +258,11 @@ to_dataframe <-
                                format = "%Y-%m-%dT%H:%M:%S")
       } else if ( coltype[i] == "discrete" ) {
         k_map <- list_allvalues(qry$flight, field_id = col_id[i], in_list = T)
-        df[ , i] <- sapply(df[ , i], function(k) k_map[[k]])
+        if ( length(k_map) == 0 ) {
+          df[ , i] <- get_rwy_id(qry, i)
+        } else {
+          df[ , i] <- sapply(df[ , i], function(k) k_map[[k]])
+        }
       } else if ( coltype[i] == "boolean") {
         df[ , i] <- as.logical(as.integer(df[ , i]))
       }
@@ -253,7 +272,15 @@ to_dataframe <-
     return(df)
   }
 
-
+get_rwy_id <-
+  function(qry, ci)
+  {
+    # Special routine for retreiving the runway IDs
+    cat("\n --Running a special routine for querying runway IDs. This will make the querying twice longer.\n")
+    qry$queryset$format <- 'display'
+    res <- run(qry)
+    res[ , ci]
+  }
 ## ---------------------------------------------------------------------------
 ## Filter-related low-level functions
 filter_fmt <-

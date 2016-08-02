@@ -291,11 +291,6 @@ update_tree <-
   function(flt, path)
   {
 
-    if (length(path)==1) {
-      flt <- add_subtree(flt, path)
-      return(flt)
-    }
-
     for ( i in seq_along(tolower(path)) ) {
 
       if (i == 1) {
