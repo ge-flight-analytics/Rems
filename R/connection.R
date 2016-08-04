@@ -31,6 +31,10 @@ connect <-
                body = body,
                encode = "form")
     }
+    if ( !is.null(content(r)$message) ) {
+      print(paste("Message:", content(r)$message))
+    }
+
     c <- list(
       foqa = list(usr=usr, pwd=pwd),
       proxies = proxies,

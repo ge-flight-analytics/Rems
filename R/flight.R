@@ -7,7 +7,7 @@ flight <-
     obj$ems_id       <- ems_id
     obj$connection   <- conn
     obj$tree         <- data.frame()
-    obj$data_source  <- list()
+    obj$database     <- list()
     obj$cntr <- 0
 
     if (treefile_exists(obj)) {
@@ -73,11 +73,11 @@ list_allvalues <-
       }
     }
 
-    dsrc_id <- flt$data_source$id
+    db_id <- flt$database$id
 
     r <- request(flt$connection,
-                 uri_keys = c('data_src', 'field'),
-                 uri_args = c(flt$ems_id, dsrc_id),
+                 uri_keys = c('database', 'field'),
+                 uri_args = c(flt$ems_id, db_id),
                  body = list('fieldId'= fld_id))
 
     vals <- content(r)$discreteValues
@@ -111,7 +111,7 @@ generate_tree <-
 
     # Connect to EMS and get the data source ID of the FDW Flight
     conn <- flt$connection
-    r    <- request(conn, uri_keys = c('data_src','group'), uri_args = flt$ems_id)
+    r    <- request(conn, uri_keys = c('database','group'), uri_args = flt$ems_id)
 
     for (x in content(r)$groups) {
       if (x$name == 'FDW') {
@@ -120,22 +120,22 @@ generate_tree <-
       }
     }
 
-    r    <- request(conn, uri_keys = c('data_src','group'), uri_args = flt$ems_id,
-                    body = list("dataSourceGroupId" = fdw$id))
+    r    <- request(conn, uri_keys = c('database','group'), uri_args = flt$ems_id,
+                    body = list("groupId" = fdw$id))
 
-    for (x in content(r)$dataSources) {
+    for (x in content(r)$databases) {
       if (x$singularName == "FDW Flight") {
         fdw_flt <- x
         fdw_flt$name <- fdw_flt$singularName
         fdw_flt$type <- NA
-        fdw_flt$nodetype <- 'data_source'
+        fdw_flt$nodetype <- 'database'
         fdw_flt$parent = NA
         break
       }
     }
 
     flt$tree <- data.frame(fdw_flt[c('id','name','type','nodetype','parent')], stringsAsFactors = FALSE)
-    flt$data_source<- fdw_flt[c('id','name','type','nodetype','parent')]
+    flt$database<- fdw_flt[c('id','name','type','nodetype','parent')]
     flt <- add_subtree(flt, fdw_flt, exclude_dirs, save_freq = 50)
     save_tree(flt)
     flt
@@ -160,13 +160,13 @@ add_subtree <-
     # If node type is "field_group", pass the field group id to the GET request to get the
     # field-group specific information.
     if (parent_node['nodetype']=='field_group') {
-      body <- list('fieldGroupId' = parent_node$id)
+      body <- list('groupId' = parent_node$id)
     } else {
       body <- NULL
     }
     r    <- request(flt$connection,
-                    uri_keys = c('data_src','field_group'),
-                    uri_args = c(flt$ems_id, flt$data_source$id),
+                    uri_keys = c('database','field_group'),
+                    uri_args = c(flt$ems_id, flt$database$id),
                     body = body)
 
     ##  Get the children fields/field groups
@@ -235,13 +235,13 @@ update_children <-
     # If node type is "field_group", pass the field group id to the GET request to get the
     # field-group specific information.
     if (parent_node['nodetype']=='field_group') {
-      body <- list('fieldGroupId'= parent_node$id)
+      body <- list('groupId'= parent_node$id)
     } else {
       body <- NULL
     }
     r    <- request(flt$connection,
-                    uri_keys = c('data_src','field_group'),
-                    uri_args = c(flt$ems_id, flt$data_source$id),
+                    uri_keys = c('database','field_group'),
+                    uri_args = c(flt$ems_id, flt$database$id),
                     body = body)
 
     ##  Get the children fields/field groups
@@ -337,7 +337,7 @@ load_tree <-
       file_name = file.path(path.package("Rems"), 'data', sprintf("FDW_flt_data_tree_ems_id_%s.rds", flt$ems_id))
     }
     flt$tree <- readRDS(file_name)
-    flt$data_source <- as.list(flt$tree[flt$tree$nodetype == "data_source", c('id','name','type','nodetype','parent')])
+    flt$database <- as.list(flt$tree[flt$tree$nodetype == "database", c('id','name','type','nodetype','parent')])
     flt
   }
 

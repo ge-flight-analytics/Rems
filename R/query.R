@@ -200,8 +200,8 @@ run <-
     output <- match.arg(output)
     cat("Sending a query to EMS ...")
     r <- request(qry$connection, rtype = "POST",
-                 uri_keys = c('data_src', 'query'),
-                 uri_args = c(qry$ems_id, qry$flight$data_source$id),
+                 uri_keys = c('database', 'query'),
+                 uri_args = c(qry$ems_id, qry$flight$database$id),
                  jsondata = qry$queryset)
     cat("Done.\n")
     if ( output == "raw" ) {
