@@ -306,7 +306,7 @@ df <- run(qry)
 ```
 
 ## Querying Time-Series Data
-You can query data of time-series parameters with respect to individual flight record. Below is an simple example code that sends a flight query first in order to retrieve a set of flights and then sends a series of queries to get some of the time-series parameters for each of these flights.
+You can query data of time-series parameters with respect to individual flight records. Below is a simple example code that sends a flight query first in order to retrieve a set of flights and then sends of queries to get some of the time-series parameters for each of these flights.
 
 ```r
 # You should instantiate an EMS connection first. It was already described above.
