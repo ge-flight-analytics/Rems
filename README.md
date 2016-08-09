@@ -33,25 +33,25 @@ conn <- connect({efoqa_usr},
                                pwd  = {proxy_pwd}))
 ```
 
+## Flight Querying
 
-
-## Instantiate Query
+### Instantiate Query
 
 
 
 ```r
-qry <- query(conn, "ems9")
+qry <- flt_query(conn, "ems9")
 ```
 Current limitations:
 
 * The current query object only support the FDW Flight data source, which seems to be reasonable for POC functionality.
 * Right now a query can be instantiated only with a single EMS system connection. I think a query object with multi-EMS connection could be quite useful for data analysts who want to do study pseudo-global patterns.
-    + Ex) query = Query(c, ems_name = c('ems9', 'ems10', 'ems11'))
-* It does not support querying time-series raw parameters yet. Adding this capability may be the next major goal. 
+    + Ex) `query <- flt_query(c, ems_name = c('ems9', 'ems10', 'ems11'))`
 
-## Datasource Setup
 
-The EMS system handles with data fields based on a hierarchical tree structure. This field tree manages mappings between names and field IDs as well as the field groups of fields. In order to send query via EMS API, the Rems package will automatically generate a data file for the static, frequently used part of the field tree and load it as default. This bare field tree includes fields of the following field groups:
+### Database Setup
+
+The EMS system handles with flight-level data fields based on a hierarchical tree structure. This field tree manages mappings between names and field IDs as well as the field groups of fields. In order to send flight query via EMS API, the Rems package will automatically generate a data file that stores a static, frequently used part of the field tree and load it as default. This bare field tree includes fields of the following field groups:
 
 * Flight Information (sub-field groups Processing and Profile 16 Extra Data were excluded)
 * Aircraft Information 
@@ -94,9 +94,9 @@ save_datatree(qry, file_name = "my_datatree.rds")
 qry <- load_datatree(qry, file_name = "my_datatree.rds")
 ```
 
-## Build Query
+### Build Flight Query
 
-### Select
+#### Select
 Select the columns to include in your query. Again you can pass consequtive words of the full field names as keywords which are case insenstive.
 ```r
 qry <- select(qry, "flight date", "customer id", "takeoff valid", "takeoff airport code")
@@ -108,7 +108,7 @@ qry <- select(qry,
               aggregate = "avg")
 ```
 
-### Group by & Order by
+#### Group by & Order by
 
 Similarly, you can pass the grouping and ordering conditions:
 ```r
@@ -119,7 +119,7 @@ qry <- group_by(qry, "flight date", "customer id", "takeoff valid", "takeoff air
 qry <- order_by(qry, "flight date")
 ```
 
-### Additional Conditions
+#### Additional Conditions
 
 If you want to get unique rows only (which is already set on as default),
 ```r
@@ -131,7 +131,7 @@ Also you can control the number of rows that will be returned. The current EMS A
 qry <- get_top(qry, 5000)
 ```
 
-### Filtering
+#### Filtering
 
 Currently the following conditional operators are supported with respect to the data field types:
 * Number: "==", "!=", "<", "<=", ">", ">="
@@ -153,7 +153,7 @@ The current filter method has the following limitation:
 * No support of NULL value filtering, which is being worked on now
 * The datetime condition should be only with the ISO8601 format
 
-## Checking the Generated JSON Query
+### Checking the Generated JSON Query
 
 You can check what would the JSON query look like before sending the query.
 ```r
@@ -283,14 +283,14 @@ This will print the following JSON string:
 ##   }
 ## }
 ```
-## Reset Query
+### Reset Flight Query
 In case you want to start over for a fresh new query,
 ```r
 qry <- reset(qry)
 ```
 Which will erase all the previous query settings.
 
-## Finally, Run the Query
+### Finally, Run the Flight Query
 
 `run()` method will send the query and translate the response from EMS in R's dataframe.
 ```r
@@ -304,6 +304,51 @@ df <- run(qry)
 ## Sending a query to EMS ...Done.
 ## Raw JSON output to R dataframe...Done.
 ```
+
+## Querying Time-Series Data
+You can query data of time-series parameters with respect to individual flight record. Below is an simple example code that sends a flight query first in order to retrieve a set of flights and then sends a series of queries to get some of the time-series parameters for each of these flights.
+
+```r
+# You should instantiate an EMS connection first. It was already described above.
+
+# Flight query with an APM profile. It will return data for 10 flights
+fq <- flt_query(conn, "ems9")
+fq <- load_datatree(fq, "stat_taxi_datatree.rds")
+fq <- select(fq,
+             "customer id", "flight record", "airframe", "flight date (exact)",
+             "takeoff airport code", "takeoff airport icao code", "takeoff runway id",
+             "takeoff airport longitude", "takeoff airport latitude",
+             "p185: processed date", "p185: oooi pushback hour gmt",
+             "p185: oooi pushback hour solar local",
+             "p185: total fuel burned from first indication of engines running to start of takeoff (kg)")
+fq <- order_by(fq, "flight record", order = 'desc')
+fq <- get_top(fq, 10)
+fq <- filter(fq,
+             "'p185: processing state' == 'Succeeded'")
+flt <- run(fq)
+
+# === Run time series query for each flight ===
+
+# Instantiate a time-series query for the same EMS9
+tsq <- tseries_query(conn, "ems9")
+
+# Select 7 example time-series params that will be retrieved for each of the 10 flights
+tsq <- select(tsq, "baro-corrected altitude", "airspeed (calibrated; 1 or only)", "ground speed (best avail)",
+                  "egt (left inbd eng)", "egt (right inbd eng)", "N1 (left inbd eng)", "N1 (right inbd eng)")
+
+# Run mult-flight repeated query
+xdata <- run_multiflts(tsq, flt, start = rep(0, nrow(flt)), end = rep(15*60, nrow(flt)))
+```
+The inputs to function `run_mutiflts(...)` are:
+* flt  : a vector of Flight Records or flight data in R dataframe format. The R dataframe should have a column of flight records with its column name "Flight Record"
+* start: a vector defining the starting times (secs) of the timepoints for individual flights. The vector length must be the same as the number of flight records
+* end  : a vector defining the end times (secs) of the timepoints for individual flights. The vector length must be the same as the number of flight records
+
+In case you just want to query for a single flight, `run(...)` function will be better suited. Below is an example of time-series querying for a single flight.
+```r
+xdata <- run(tsq, 1901112, start = 0, end = 900)
+```
+This function will return an R dataframe that contains timepoints from 0 to 900 secs and corresponding values for selected parameters.
 
 
 
