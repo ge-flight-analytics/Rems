@@ -52,6 +52,7 @@ reconnect <-
   }
 
 
+#' @export
 request <-
   function(conn, rtype = "GET", uri_keys = NULL, uri_args = NULL,
            headers = NULL, body = NULL, jsondata = NULL,
