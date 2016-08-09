@@ -340,9 +340,14 @@ tsq <- select(tsq, "baro-corrected altitude", "airspeed (calibrated; 1 or only)"
 xdata <- run_multiflts(tsq, flt, start = rep(0, nrow(flt)), end = rep(15*60, nrow(flt)))
 ```
 The inputs to function `run_mutiflts(...)` are:
+* qry  : time-series query instance
 * flt  : a vector of Flight Records or flight data in R dataframe format. The R dataframe should have a column of flight records with its column name "Flight Record"
 * start: a vector defining the starting times (secs) of the timepoints for individual flights. The vector length must be the same as the number of flight records
 * end  : a vector defining the end times (secs) of the timepoints for individual flights. The vector length must be the same as the number of flight records
+
+The output will be R list object whose elements contain the following data:
+* flt_data : R list. Copy of the flight data for each flight
+* ts_data  : R dataframe. the time series data for each flight
 
 In case you just want to query for a single flight, `run(...)` function will be better suited. Below is an example of time-series querying for a single flight.
 ```r
