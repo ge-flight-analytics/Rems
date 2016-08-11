@@ -13,7 +13,6 @@ flt_query <-
   {
     obj <- list()
     class(obj) <- 'FltQuery'
-
     # Instantiating other objects
     obj$connection <- conn
     obj$ems        <- ems(conn)
