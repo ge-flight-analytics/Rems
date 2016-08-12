@@ -1,12 +1,12 @@
 
 analytic <-
-  function(conn, ems_id)
+  function(conn, ems_id, new_data = TRUE)
   {
     obj <- list()
     class(obj) <- "analytic"
     obj$ems_id        <- ems_id
     obj$connection    <- conn
-    if ( paramfile_exists(obj) ) {
+    if ( paramfile_exists(obj) & (!new_data)) {
       obj <- load_paramtable(obj)
     } else {
       obj$param_table   <- data.frame(stringsAsFactors = F)

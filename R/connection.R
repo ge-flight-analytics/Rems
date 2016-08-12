@@ -95,7 +95,8 @@ request <-
         r <- GET(uri, prxy, query = body, add_headers(.headers = headers), encode = encoding)
       }, error = function(err) {
         print(err)
-        print("Trying to Reconnect EMS...")
+        cat(sprintf("Http status code %s: %s", status_code(r), content(r)))
+        cat("Trying to Reconnect EMS...")
         conn = reconnect(conn)
         r <- GET(uri, prxy, query = body, add_headers(.headers = headers), encode = encoding)
       }
@@ -107,7 +108,8 @@ request <-
         r <- POST(uri, prxy, body = body, add_headers(.headers = headers), encode = encoding)
       }, error = function(err) {
         print(err)
-        print("Trying to Reconnect EMS...")
+        cat(sprintf("Http status code %s: %s", status_code(r), content(r)))
+        cat("Trying to Reconnect EMS...\n")
         conn = reconnect(conn)
         r <- POST(uri, prxy, body = body, add_headers(.headers = headers), encode = encoding)
       })

@@ -9,7 +9,7 @@ sp_ops <- list(
 
 #' @export
 flt_query <-
-  function(conn, ems_name)
+  function(conn, ems_name, new_data = TRUE)
   {
     obj <- list()
     class(obj) <- 'FltQuery'
@@ -17,7 +17,7 @@ flt_query <-
     obj$connection <- conn
     obj$ems        <- ems(conn)
     obj$ems_id     <- get_id(obj$ems, ems_name)
-    obj$flight     <- flight(conn, obj$ems_id)
+    obj$flight     <- flight(conn, obj$ems_id, new_data)
 
     # object data
     obj$queryset <- list()

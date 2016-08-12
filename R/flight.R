@@ -1,6 +1,6 @@
 
 flight <-
-  function(conn, ems_id)
+  function(conn, ems_id, new_data = FALSE)
   {
     obj <- list()
     class(obj) <- "flight"
@@ -10,7 +10,7 @@ flight <-
     obj$database     <- list()
     obj$cntr <- 0
 
-    if (treefile_exists(obj)) {
+    if (treefile_exists(obj) & (!new_data)) {
       obj <- load_tree(obj)
     } else {
       obj <- generate_tree(obj)
