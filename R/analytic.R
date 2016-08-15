@@ -1,6 +1,6 @@
 
 analytic <-
-  function(conn, ems_id, new_data = TRUE)
+  function(conn, ems_id, new_data = FALSE)
   {
     obj <- list()
     class(obj) <- "analytic"

@@ -1,6 +1,6 @@
 #' @export
 tseries_query <-
-  function(conn, ems_name)
+  function(conn, ems_name, new_data = FALSE)
   {
     obj <- list()
     class(obj) <- 'TsQuery'
@@ -9,7 +9,7 @@ tseries_query <-
     obj$connection <- conn
     obj$ems        <- ems(conn)
     obj$ems_id     <- get_id(obj$ems, ems_name)
-    obj$analytic   <- analytic(conn, obj$ems_id)
+    obj$analytic   <- analytic(conn, obj$ems_id, new_data)
 
     # object data
     obj$queryset <- list()

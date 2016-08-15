@@ -9,7 +9,7 @@ sp_ops <- list(
 
 #' @export
 flt_query <-
-  function(conn, ems_name, new_data = TRUE)
+  function(conn, ems_name, new_data = FALSE)
   {
     obj <- list()
     class(obj) <- 'FltQuery'
