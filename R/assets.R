@@ -22,7 +22,11 @@ update_list <- function(obj) {
 
 get_id <- function(obj, name) {
   name <- toupper(name)
-  return(obj$list$id[obj$list$name==name])
+  x <- obj$list$id[obj$list$name==name]
+  if ( length(x)==0 ) {
+    stop(sprintf('%s is not available at EMS API.', name))
+  }
+  return(x)
 }
 
 

@@ -106,7 +106,7 @@ generate_tree <-
   function(flt)
   {
     exclude_dirs <- c("Download Information", "Download Review", "Processing",
-                      "Profile 16 Extra Data", "Operational Information", "Operational Information",
+                      "Profile 16 Extra Data", "Operational Information",
                       "Operational Information (ODW2)", "Profiles")
 
     # Connect to EMS and get the data source ID of the FDW Flight

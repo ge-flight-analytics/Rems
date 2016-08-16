@@ -27,7 +27,7 @@ search_param <-
     # Param set JSON to R list
     prm <- content(r)
     if ( length(prm)==0 ) {
-      stop(sprintf("No parameter found with search keyword %s.", kw))
+      stop(sprintf("No parameter found with search keyword %s.", keyword))
     } else if ( length(prm) > 1 ) {
       # If the param set has more than one param, order than by length
       # of their names

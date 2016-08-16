@@ -68,8 +68,8 @@ range <-
     if ( !is.numeric(c(tstart, tend)) ) {
       stop(sprintf("The values for time range should be numeric. Given values are from %s to %s.", tstart, tend))
     }
-    qry$queryset[["start"]] = tstart
-    qry$queryset[["end"]]   = tend
+    qry$queryset[["start"]] <- tstart
+    qry$queryset[["end"]]   <- tend
     return(qry)
   }
 
@@ -122,7 +122,7 @@ run_multiflts <-
       FR <- flight
     }
     cat(sprintf("=== Start running time series data querying for %d flights ===\n", length(FR)))
-    for (i in 1:nrow(flight)) {
+    for (i in 1:length(FR)) {
       cat(sprintf("%d / %d: FR %d\n", i, length(FR), FR[i]))
       res[[i]] <- list()
       if ( attr_flag ) {
