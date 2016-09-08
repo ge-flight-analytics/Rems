@@ -1,3 +1,6 @@
+sp_chr <- c("\\.", "\\^", "\\(", "\\)", "\\[", "\\]", "\\{", "\\}",
+            "\\-", "\\+", "\\?", "\\!", "\\*", "\\$", "\\|", "\\&")
+
 
 flight <-
   function(conn, ems_id, new_data = FALSE)
@@ -25,23 +28,27 @@ search_fields <-
     for ( f in flist ) {
       if ( length(f) == 1 ) {
         # Single keyword case
-        f  <- tolower(f)
         names <- tolower(flt$tree$name)
-        df <- subset(flt$tree, (nodetype=='field') & ((f==names) | grepl(f, names)) )
+        for ( x in sp_chr ) {
+          f <- gsub(x, paste("\\", x, sep=""), f)
+        }
+        df <- subset(flt$tree, (nodetype=='field') & ((f==names) | grepl(f, names, ignore.case = T)) )
         df <- df[order(nchar(df$name)), ]
         res[[length(res)+1]] <- as.list(df[1,])
 
       } else if ( length(f) > 1 ){
         # Vector of hierarchical keyword set
-        f  <- tolower(f)
         chld <- flt$tree
         for ( i in seq_along(f) ) {
+          for ( x in sp_chr ) {
+            f[i] <- gsub(x, paste("\\", x, sep=""), f[i])
+          }
           names   <- tolower(chld$name)
-          node_id <- chld[(f[i]==names) | grep(f[i], names), 'id']
+          node_id <- chld[(f[i]==names) | grep(f[i], names, ignore.case = T), 'id']
           if (i < length(f)) {
             chld    <- subset(flt$tree, parent %in% node_id)
           } else {
-            chld    <- subset(chld, (nodetype=='field') & ((f[i]==names) | grepl(f[i], names)) )
+            chld    <- subset(chld, (nodetype=='field') & ((f[i]==names) | grepl(f[i], names, ignore.case = T)) )
           }
         }
         res[[length(res)+1]] <- as.list( chld[order(nchar(chld$name))[1], ] )
