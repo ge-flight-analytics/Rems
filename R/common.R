@@ -27,7 +27,7 @@ uris <- list(
   database = list(
     group = '/v2/ems-systems/%s/database-groups',			#(ems-system_id)
     field_group = '/v2/ems-systems/%s/databases/%s/field-groups',	#(ems-system_id, data_src_id)
-    field = '/v2/ems-systems/%s/databases/%s/fields',
+    field = '/v2/ems-systems/%s/databases/%s/fields/%s', #(ems-system_id, database_id, field_id)
     query = '/v2/ems-systems/%s/databases/%s/query'
   ),
   analytic = list(

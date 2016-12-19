@@ -82,10 +82,13 @@ list_allvalues <-
 
     db_id <- flt$database$id
 
+    # r <- request(flt$connection,
+    #              uri_keys = c('database', 'field'),
+    #              uri_args = c(flt$ems_id, db_id),
+    #              body = list('fieldId'= fld_id))
     r <- request(flt$connection,
                  uri_keys = c('database', 'field'),
-                 uri_args = c(flt$ems_id, db_id),
-                 body = list('fieldId'= fld_id))
+                 uri_args = c(flt$ems_id, db_id, fld_id))
 
     vals <- content(r)$discreteValues
     if ( in_list ) {
@@ -102,7 +105,7 @@ get_value_id <-
     id <- which(val_map==value)
 
     if ( length(id)==0 ) {
-      stop("The queried value '%s' is not part of the possible values of the discrete field.")
+      stop(sprintf("The queried value '%s' is not part of the possible values of the discrete field.", value))
     }
     id <- as.integer(names(id))
     return(id)
