@@ -12,6 +12,7 @@ flight <-
     obj$tree         <- data.frame()
     obj$database     <- list()
     obj$cntr <- 0
+    obj$key_maps     <- list()
 
     if (treefile_exists(obj) & (!new_data)) {
       obj <- load_tree(obj)
@@ -80,21 +81,21 @@ list_allvalues <-
       }
     }
 
-    db_id <- flt$database$id
-
-    # r <- request(flt$connection,
-    #              uri_keys = c('database', 'field'),
-    #              uri_args = c(flt$ems_id, db_id),
-    #              body = list('fieldId'= fld_id))
-    r <- request(flt$connection,
-                 uri_keys = c('database', 'field'),
-                 uri_args = c(flt$ems_id, db_id, fld_id))
-
-    vals <- content(r)$discreteValues
-    if ( in_list ) {
-      return(vals)
+    if (is.null(flt$key_maps[[fld_id]])) {
+      db_id <- flt$database$id
+      cat("Getting key-value mappings from API. (Caution: runway ID takes much longer)\n")
+      r <- request(flt$connection,
+                   uri_keys = c('database', 'field'),
+                   uri_args = c(flt$ems_id, db_id, fld_id))
+      kmap <- content(r)$discreteValues
+      flt$key_maps[[fld_id]] <- kmap
+      eval.parent(substitute(flt <- flt))
     }
-    return(unname(unlist(vals)))
+
+    if ( in_list ) {
+      return(flt$key_maps[[fld_id]])
+    }
+    return(unname(unlist(flt$key_maps[[fld_id]])))
   }
 
 
