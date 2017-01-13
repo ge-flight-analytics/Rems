@@ -2,6 +2,20 @@ sp_chr <- c("\\.", "\\^", "\\(", "\\)", "\\[", "\\]", "\\{", "\\}",
             "\\-", "\\+", "\\?", "\\!", "\\*", "\\$", "\\|", "\\&")
 
 
+storage <- setRefClass("Storage",
+                       fields = list(kv_map = "list"),
+                       methods = list(
+                         set = function(key, val) {
+                           kv_map[[key]] <<- val
+                         },
+                         has_key = function(key) {
+                           return(!is.null(kv_map[[key]]))
+                         },
+                         get = function(key) {
+                           return(kv_map[[key]])
+                         }
+                       ))
+
 flight <-
   function(conn, ems_id, new_data = FALSE)
   {
@@ -12,7 +26,7 @@ flight <-
     obj$tree         <- data.frame()
     obj$database     <- list()
     obj$cntr <- 0
-    obj$key_maps     <- list()
+    obj$key_maps     <- storage$new()
 
     if (treefile_exists(obj) & (!new_data)) {
       obj <- load_tree(obj)
@@ -81,21 +95,22 @@ list_allvalues <-
       }
     }
 
-    if (is.null(flt$key_maps[[fld_id]])) {
+    if (flt$key_maps$has_key(fld_id)) {
+      kmap <- flt$key_maps$get(fld_id)
+    } else {
       db_id <- flt$database$id
       cat("Getting key-value mappings from API. (Caution: runway ID takes much longer)\n")
       r <- request(flt$connection,
                    uri_keys = c('database', 'field'),
                    uri_args = c(flt$ems_id, db_id, fld_id))
       kmap <- content(r)$discreteValues
-      flt$key_maps[[fld_id]] <- kmap
-      eval.parent(substitute(flt <- flt))
+      flt$key_maps$set(fld_id, kmap)
     }
 
     if ( in_list ) {
-      return(flt$key_maps[[fld_id]])
+      return(kmap)
     }
-    return(unname(unlist(flt$key_maps[[fld_id]])))
+    return(kmap)
   }
 
 

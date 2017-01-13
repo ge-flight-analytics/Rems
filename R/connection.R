@@ -114,6 +114,16 @@ request <-
         r <- POST(uri, prxy, body = body, add_headers(.headers = headers), encode = encoding)
       })
 
+    } else if (rtype=="DELETE") {
+      tryCatch({
+        r <- DELETE(uri, prxy, body = body, add_headers(.headers = headers), encode = encoding)
+      }, error = function(err) {
+        print(err)
+        cat(sprintf("Http status code %s: %s", status_code(r), content(r)))
+        cat("Trying to Reconnect EMS...\n")
+        conn = reconnect(conn)
+        r <- DELETE(uri, prxy, body = body, add_headers(.headers = headers), encode = encoding)
+      })
     } else {
       stop(sprintf("%s: Unsupported request type.", rtype))
     }

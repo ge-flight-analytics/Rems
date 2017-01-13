@@ -28,7 +28,10 @@ uris <- list(
     group = '/v2/ems-systems/%s/database-groups',			#(ems-system_id)
     field_group = '/v2/ems-systems/%s/databases/%s/field-groups',	#(ems-system_id, data_src_id)
     field = '/v2/ems-systems/%s/databases/%s/fields/%s', #(ems-system_id, database_id, field_id)
-    query = '/v2/ems-systems/%s/databases/%s/query'
+    query = '/v2/ems-systems/%s/databases/%s/query',
+    open_asyncq	= '/v2/ems-systems/%s/databases/%s/async-query', #(ems-system_id, database_id)
+    get_asyncq = '/v2/ems-systems/%s/databases/%s/async-query/%s/read/%s/%s', #(ems-system_id, database_id, async_query_id, start_row, end_row)
+    close_asyncq = '/v2/ems-systems/%s/databases/%s/async-query/%s'
   ),
   analytic = list(
     search   = '/v2/ems-systems/%s/analytics',    # (emsSystemId)
@@ -50,4 +53,8 @@ select <- function(qry, ...) UseMethod("select", qry)
 #' @export
 run <- function(qry, ...) UseMethod("run", qry)
 
+#' @export
+simple_run <- function(qry, ...) UseMethod("simple_run", qry)
 
+#' @export
+async_run <- function(qry, ...) UseMethod("async_run", qry)

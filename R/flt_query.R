@@ -36,7 +36,6 @@ reset.FltQuery <-
       groupBy = list(),
       orderBy = list(),
       distinct = TRUE,
-      top = 10,
       format = "none"
     )
     qry$columns <- list()
@@ -165,10 +164,6 @@ distinct <-
 get_top <-
   function(qry, n)
   {
-    if ( n > 5000 ) {
-      n = 5000
-      cat("get_top(...): EMS API currently has a limit in returned number of rows which is 5000 rows. Automatically adjusting the number to 5000.")
-    }
     qry$queryset$top <- n
     return(qry)
   }
@@ -193,12 +188,12 @@ json_str <-
   }
 
 #' @export
-run.FltQuery <-
+simple_run.FltQuery <-
   function(qry, output = c("dataframe", "raw"))
   {
 
     output <- match.arg(output)
-    cat("Sending a query to EMS ...")
+    cat("Sending a regular query to EMS ...")
     r <- request(qry$connection, rtype = "POST",
                  uri_keys = c('database', 'query'),
                  uri_args = c(qry$ems_id, qry$flight$database$id),
@@ -210,6 +205,100 @@ run.FltQuery <-
     else if ( output == "dataframe" ) {
       return(to_dataframe(qry, content(r)))
     }
+  }
+
+
+#' @export
+async_run.FltQuery <-
+  function(qry, n_row = 10000)
+  {
+    open_async_query <- function() {
+      cat('Sending and opening an async-query to EMS ...\n')
+      r <- request(qry$connection, rtype = "POST",
+                   uri_keys = c('database', 'open_asyncq'),
+                   uri_args = c(qry$ems_id, qry$flight$database$id),
+                   jsondata = qry$queryset)
+      if (is.null(content(r)$id)) {
+        print(headers(r))
+        print(content(r))
+        stop("Opening Async query did not return the query Id.")
+      }
+      cat('Done.\n')
+      content(r)
+    }
+
+    # Open async-query
+    async_q <- open_async_query()
+
+    ctr <- 1
+    df  <- data.frame(stringsAsFactors = F)
+    req_error <- F
+    while(T) {
+      cat(sprintf("=== Async call: %d === \n", ctr))
+      tryCatch({
+        # Mini batch async call. Sometimes the issued query ID gets expired.
+        # In that case, try up to three times until getting a new query ID.
+        for(i in 1:3) {
+          r <- request(qry$connection, rtype = "GET",
+                       uri_keys = c('database', 'get_asyncq'),
+                       uri_args = c(qry$ems_id,
+                                    qry$flight$database$id,
+                                    async_q$id,
+                                    n_row*(ctr-1),
+                                    n_row*ctr-1))
+          if (is.null(content(r)$rows)) {
+            # Reopen the query if not returning data
+            async_q <- open_async_query()
+          } else {
+            break
+          }
+        }
+        resp <- content(r)
+        resp$header <- async_q$header
+      }, error = function(e) {
+        cat("Something's wrong. Returning what has been sent so far.\n")
+        print(headers(r))
+        # print(content(r))
+        break
+      })
+      if (length(resp$rows) < 1) {
+        break
+      }
+      dff <- to_dataframe(qry, resp)
+      df <- rbind(df, dff)
+      cat(sprintf("Received up to  %d rows.\n", nrow(df)))
+      if (nrow(dff) < n_row) {
+        break
+      }
+      ctr <- ctr + 1
+    }
+    tryCatch({
+      r <- request(qry$connection, rtype = "DELETE",
+                   uri_keys = c('database', 'close_asyncq'),
+                   uri_args = c(qry$ems_id, qry$flight$database$id, query_id))
+      cat(sprintf("Async query connection (query ID: %s) deleted.\n", query_id))
+    }, error = function(e) {
+      cat(sprintf("Couldn't delete the async query (query ID: %s). Probably it was already expired.\n", query_id))
+    })
+
+    cat("Done.\n")
+    df
+  }
+
+
+#' @export
+run.FltQuery <-
+  function(qry, n_row = 10000)
+  {
+    if (is.null(qry$queryset$top)) {
+      Nout <- NULL
+    } else {
+      Nout <- qry$queryset$top
+    }
+    if ((!is.null(Nout)) && (Nout <= 5000)) {
+      return(simple_run(qry, output = "dataframe"))
+    }
+    return(async_run(qry, n_row = n_row))
   }
 
 
@@ -275,6 +364,7 @@ to_dataframe <-
 get_rwy_id <-
   function(qry, ci)
   {
+    # ==== Deprecated =====
     # Special routine for retreiving the runway IDs
     cat("\n --Running a special routine for querying runway IDs. This will make the querying twice longer.\n")
     qry$queryset$format <- 'display'
