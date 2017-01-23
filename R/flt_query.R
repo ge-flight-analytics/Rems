@@ -210,7 +210,7 @@ simple_run.FltQuery <-
 
 #' @export
 async_run.FltQuery <-
-  function(qry, n_row = 10000)
+  function(qry, n_row = 25000)
   {
     open_async_query <- function() {
       cat('Sending and opening an async-query to EMS ...\n')
@@ -275,10 +275,10 @@ async_run.FltQuery <-
     tryCatch({
       r <- request(qry$connection, rtype = "DELETE",
                    uri_keys = c('database', 'close_asyncq'),
-                   uri_args = c(qry$ems_id, qry$flight$database$id, query_id))
-      cat(sprintf("Async query connection (query ID: %s) deleted.\n", query_id))
+                   uri_args = c(qry$ems_id, qry$flight$database$id, async_q$id))
+      cat(sprintf("Async query connection (query ID: %s) deleted.\n", async_q$id))
     }, error = function(e) {
-      cat(sprintf("Couldn't delete the async query (query ID: %s). Probably it was already expired.\n", query_id))
+      cat(sprintf("Couldn't delete the async query (query ID: %s). Probably it was already expired.\n", async_q$id))
     })
 
     cat("Done.\n")
@@ -288,14 +288,14 @@ async_run.FltQuery <-
 
 #' @export
 run.FltQuery <-
-  function(qry, n_row = 10000)
+  function(qry, n_row = 25000)
   {
     if (is.null(qry$queryset$top)) {
       Nout <- NULL
     } else {
       Nout <- qry$queryset$top
     }
-    if ((!is.null(Nout)) && (Nout <= 5000)) {
+    if ((!is.null(Nout)) && (Nout <= 25000)) {
       return(simple_run(qry, output = "dataframe"))
     }
     return(async_run(qry, n_row = n_row))

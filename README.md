@@ -126,7 +126,7 @@ If you want to get unique rows only (which is already set on as default),
 qry <- distinct(qry) # identical with distinct(qry, TRUE)
 # If you want to turn off "distinct", do qry <- distinct(qry, FALSE)
 ```
-Also you can control the number of rows that will be returned. The current EMS API is limited to return maximum of 5000 rows. Any greater number will be truncated to 5000 rows.
+Optionally you can control the number of rows that will be returned. The following code will set the top 5000 rows as your returned data.
 ```r
 qry <- get_top(qry, 5000)
 ```
@@ -296,13 +296,16 @@ Which will erase all the previous query settings.
 ```r
 df <- run(qry)
 
-# In case you want the raw response,
-# df <- run(qry, output = "raw")
+# This will return your data in R's dataframe format.
 ```
+EMS API supports two different query executions which are regular and async queries. The regular query has a data size limit for the output data, which is 25000 rows. On the other hand, the async query is able to handle large output data by letting you send repeated requests for smaller batches of the large output data.
 
-```
-## Sending a query to EMS ...Done.
-## Raw JSON output to R dataframe...Done.
+The `run()` method takes care of the repeated async request for a query whose returning data is expected to be large.
+
+The batch data size for the async request is set 25,000 rows as default (which is the maximum). If you want to change this size,
+```r
+# Set the batch size as 20,000 rows per request
+df <- query.run(qry, n_row = 20000)
 ```
 
 ## Querying Time-Series Data
