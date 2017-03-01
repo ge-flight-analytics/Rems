@@ -9,6 +9,8 @@ License: GE Proprietary
 LazyData: TRUE
 Depends:
     R (>= 3.2.3),
+    DBI (>= 0.5),
+    RSQLite (>= 1.1),
     httr (>= 1.1.0),
     jsonlite (>= 0.9.21)
 RoxygenNote: 5.0.1
