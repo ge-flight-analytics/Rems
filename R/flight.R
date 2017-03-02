@@ -380,7 +380,7 @@ search_fields <-
           if (i < length(f)) {
             chld    <- chld[chld$parent_id %in% parent_id, ]
           } else {
-            chld    <- subset(chld, (nodetype=='field') & grepl(ff, names, ignore.case = T) )
+            chld    <- subset(chld, (nodetype=='field') & grepl(ff, name, ignore.case = T) )
           }
         }
         fres <- chld
