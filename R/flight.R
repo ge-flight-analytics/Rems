@@ -1,5 +1,4 @@
-sp_chr <- c("\\.", "\\^", "\\(", "\\)", "\\[", "\\]", "\\{", "\\}",
-            "\\-", "\\+", "\\?", "\\!", "\\*", "\\$", "\\|", "\\&")
+
 exclude_dirs <- c('Download Information', 'Download Review', 'Processing',
                   'Profile 16 Extra Data', 'Flight Review', 'Data Information',
                   'Operational Information', 'Operational Information (ODW2)',
@@ -359,53 +358,45 @@ make_default_tree <-
 
 
 search_fields <-
-  function(flt, ...)
+  function(flt, ..., unique = T)
   {
     flist <- list(...)
-    res   <- list()
+    res   <- data.frame()
     for ( f in flist ) {
       if ( length(f) == 1 ) {
         # Single keyword case
-        names <- tolower(flt$tree$name)
-        for ( x in sp_chr ) {
-          f <- gsub(x, paste("\\", x, sep=""), f)
-        }
-        df <- subset(flt$tree, (nodetype=='field') & ((f==names) | grepl(f, names, ignore.case = T)) )
-        df <- df[order(nchar(df$name)), ]
-        res[[length(res)+1]] <- as.list(df[1,])
-
-      } else if ( length(f) > 1 ){
+        tr <- flt$trees$fieldtree
+        fres <- subset(tr, (nodetype=="field") & grepl(treat_spchar(f), name, ignore.case = T))
+      } else if ( length(f) > 1 ) {
         # Vector of hierarchical keyword set
-        chld <- flt$tree
+        chld <- flt$trees$fieldtree
         for ( i in seq_along(f) ) {
-          for ( x in sp_chr ) {
-            f[i] <- gsub(x, paste("\\", x, sep=""), f[i])
-          }
-          names   <- tolower(chld$name)
-          node_id <- chld[(f[i]==names) | grep(f[i], names, ignore.case = T), 'id']
+          ff <- treat_spchar(f[i])
+          parent_id <- subset(chld, grepl(ff, name, ignore.case = T))$id
           if (i < length(f)) {
-            chld    <- subset(flt$tree, parent %in% node_id)
+            chld    <- chld[chld$parent_id %in% parent_id, ]
           } else {
-            chld    <- subset(chld, (nodetype=='field') & ((f[i]==names) | grepl(f[i], names, ignore.case = T)) )
+            chld    <- subset(chld, (nodetype=='field') & grepl(ff, names, ignore.case = T) )
           }
         }
-        res[[length(res)+1]] <- as.list( chld[order(nchar(chld$name))[1], ] )
+        fres <- chld
       }
+      if (nrow(fres) == 0) {
+        # No returned value. Raise an error.
+        stop(sprintf("No field found with field keyword %s.", f))
+      } else {
+        if (unique) {
+          fres <- get_shortest(fres)
+        }
+      }
+      res <- rbind(res,fres, stringsAsFactors=F)
     }
-
-    if ( any(is.na(sapply(res, function(x) x$id))) ) {
-      stop("Some of the search results for give field keywords did not return fields. Please check if the keywords are valid.")
-    }
-
-    # if ( length(res) == 1 ) {
-    #   res <- res[[1]]
-    # }
-    return(res)
+    return(lapply(1:nrow(res), function(i) as.list(res[i,])))
   }
 
 
 list_allvalues <-
-  function(flt, field = NULL, field_id = NULL, in_list=FALSE)
+  function(flt, field = NULL, field_id = NULL, in_list=FALSE, in_df=FALSE)
   {
     fld_id <- field_id
 
@@ -418,36 +409,64 @@ list_allvalues <-
       }
     }
 
-    if (flt$key_maps$has_key(fld_id)) {
-      kmap <- flt$key_maps$get(fld_id)
-    } else {
-      db_id <- flt$database$id
+    tr <- flt$trees$kvmaps
+    kmap <- subset(tr, (ems_id==flt$ems_id) & (id==fld_id))
+
+    if (length(kmap)==0) {
       cat("Getting key-value mappings from API. (Caution: runway ID takes much longer)\n")
       r <- request(flt$connection,
                    uri_keys = c('database', 'field'),
-                   uri_args = c(flt$ems_id, db_id, fld_id))
-      kmap <- content(r)$discreteValues
-      flt$key_maps$set(fld_id, kmap)
+                   uri_args = c(flt$ems_id, flt$db_id, fld_id))
+      km <- content(r)$discreteValues
+      kmap <- data.frame(ems_id=flt$ems_id,
+                         id    =fld_id,
+                         key   =names(km),
+                         value =unlist(km, use.names = F), strinsAsFactors=F)
+      flt$trees$kvmaps <- rbind(flt$trees$kvmaps, kmap)
+      save_kvmaps(flt)
     }
-
-    if ( in_list ) {
-      return(kmap)
+    if (in_list) {
+      return( lapply(1:nrow(kmap),function(i) as.list(kmap[i, ])) )
     }
-    return(kmap)
+    if (in_df) {
+      return(kmap[, c('key','value')])
+    }
+    return( kmap$value)
   }
 
 
 get_value_id <-
   function(flt, value, field=NULL, field_id=NULL)
   {
-    val_map <- list_allvalues(flt, field = field, field_id = field_id, in_list = T)
-    id <- which(val_map==value)
+    kvmap <- list_allvalues(flt, field = field, field_id = field_id, in_df = T)
+    key   <- kvmap[kvmap$value==value, 'key']
 
-    if ( length(id)==0 ) {
-      stop(sprintf("The queried value '%s' is not part of the possible values of the discrete field.", value))
+    if ( length(key)==0 ) {
+      stop(sprintf("%s could not be found from the list of the field values.", value))
     }
-    id <- as.integer(names(id))
-    return(id)
+    return(as.integer(key))
+  }
+
+
+get_shortest <-
+  function(fields)
+  {
+    if (class(fields)!="data.frame") {
+      stop("Input should be a data frame")
+    }
+    as.dict(fields[order(nchar(fields$name)), ])
+  }
+
+
+treat_spchar <-
+  function(p)
+  {
+    sp_chr <- c("\\.", "\\^", "\\(", "\\)", "\\[", "\\]", "\\{", "\\}", "<", ">",
+                "\\-", "\\+", "\\?", "\\!", "\\*", "\\$", "\\|", "\\&", "\\%")
+    for (x in sp_chr) {
+      p <- gsub(x, paste("\\\\Q",x,"\\\\E"), p)
+    }
+    p
   }
 
 
