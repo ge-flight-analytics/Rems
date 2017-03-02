@@ -60,7 +60,7 @@ get_fieldtree <-
       names(dat) <- cols
       return(dat)
     } else {
-      dat <- get_data(flt$metadata, sprintf("ems_id = %d and db_id = '%s'", flt$ems_id, flt$db_id))
+      dat <- get_data(flt$metadata, 'fieldtree',sprintf("ems_id = %d and db_id = '%s'", flt$ems_id, flt$db_id))
       return(dat)
     }
   }
@@ -129,8 +129,8 @@ set_database.Flight <-
     tr <- flt$trees$dbtree
     flt$db_id <- tr[tr$nodetype=="database" & grepl(treat_spchar(dbname), tr$name, ignore.case=T), 'id']
     flt$trees$fieldtree <- get_fieldtree(flt)
-    flt <- update_children(get_database.Flight(flt), treetype= "fieldtree")
-    cat("Using database '%s'.\n", get_database.Flight(flt)$name)
+    flt <- update_children(flt, get_database.Flight(flt), treetype= "fieldtree")
+    cat(sprintf("Using database '%s'.\n", get_database.Flight(flt)$name))
     flt
   }
 
@@ -139,7 +139,7 @@ get_database.Flight <-
   function(flt)
   {
     tr <- flt$trees$dbtree
-    return(as.list(tr[tr$db_id==flt$db_id, ]))
+    return(as.list(tr[tr$nodetype=="database" & tr$id==flt$db_id, ]))
   }
 
 
@@ -218,7 +218,7 @@ fl_request <-
 add_subtree <-
   function(flt, parent, exclude_tree = c(), treetype = c('fieldtree', 'dbtree')) {
 
-    cat(paste("On %s (%s)...\n", parent$name, parent$nodetype))
+    cat(sprintf("On %s (%s)...\n", parent$name, parent$nodetype))
 
     if (treetype == 'dbtree') {
       searchtype <- 'database'
@@ -278,18 +278,18 @@ update_children <-
   function(flt, parent, treetype = c('fieldtree', 'dbtree'))
   {
 
-    cat(paste("On %s (%s)...\n", parent$name, parent$nodetype))
+    cat(sprintf("On %s (%s)...\n", parent$name, parent$nodetype))
 
     if (treetype == 'dbtree') {
       searchtype <- 'database'
       res <- db_request(flt, parent)
     } else {
-      searchtype <- 'fieldtree'
+      searchtype <- 'field'
       res <- fl_request(flt, parent)
     }
 
     tr <- flt$trees[[treetype]]
-    flt$trees[[treetype]] <- subset(tr, (nodetype==searchtype) & (parent_id == parent$id))
+    flt$trees[[treetype]] <- subset(tr, !((nodetype==searchtype) & (parent_id == parent$id)))
 
     if (length(res$d1) > 0) {
       flt$trees[[treetype]] <- rbind(flt$trees[[treetype]], lls_to_df(res$d1), stringsAsFactors=F)
@@ -302,14 +302,18 @@ update_children <-
     new_ones   <- sapply(res$d2, function(x) x$id)
 
     rm_id <- setdiff(old_ones, new_ones)
-    for (x in subset(old_groups, id %in% rm_id)) {
-      flt <- remove_subtree(flt, x, treetype)
+    if (length(rm_id) >0) {
+      for (x in subset(old_groups, id %in% rm_id)) {
+        flt <- remove_subtree(flt, x, treetype)
+      }
     }
 
-    add_id <- setdif(new_ones, old_ones)
-    for (x in res$d2) {
-      if (x$id %in% add_id) {
-        flt$trees[[treetype]] <- rbind(flt$trees[[treetype]], x, stringsAsFactors=F)
+    add_id <- setdiff(new_ones, old_ones)
+    if (length(add_id) > 0) {
+      for (x in res$d2) {
+        if (x$id %in% add_id) {
+          flt$trees[[treetype]] <- rbind(flt$trees[[treetype]], x, stringsAsFactors=F)
+        }
       }
     }
     flt
@@ -396,7 +400,7 @@ search_fields <-
 
 
 list_allvalues <-
-  function(flt, field = NULL, field_id = NULL, in_list=FALSE, in_df=FALSE)
+  function(flt, field = NULL, field_id = NULL, in_vec=FALSE, in_df=FALSE)
   {
     fld_id <- field_id
 
@@ -412,7 +416,7 @@ list_allvalues <-
     tr <- flt$trees$kvmaps
     kmap <- subset(tr, (ems_id==flt$ems_id) & (id==fld_id))
 
-    if (length(kmap)==0) {
+    if (nrow(kmap)==0) {
       cat("Getting key-value mappings from API. (Caution: runway ID takes much longer)\n")
       r <- request(flt$connection,
                    uri_keys = c('database', 'field'),
@@ -421,12 +425,14 @@ list_allvalues <-
       kmap <- data.frame(ems_id=flt$ems_id,
                          id    =fld_id,
                          key   =names(km),
-                         value =unlist(km, use.names = F), strinsAsFactors=F)
+                         value =unlist(km, use.names = F), stringsAsFactors=F)
       flt$trees$kvmaps <- rbind(flt$trees$kvmaps, kmap)
       save_kvmaps(flt)
     }
-    if (in_list) {
-      return( lapply(1:nrow(kmap),function(i) as.list(kmap[i, ])) )
+    if (in_vec) {
+      aa <- kmap[,'value']
+      names(aa) <- kmap[,'key']
+      return(aa)
     }
     if (in_df) {
       return(kmap[, c('key','value')])
@@ -454,7 +460,7 @@ get_shortest <-
     if (class(fields)!="data.frame") {
       stop("Input should be a data frame")
     }
-    as.dict(fields[order(nchar(fields$name)), ])
+    as.list(fields[order(nchar(fields$name))[1], ])
   }
 
 
@@ -464,7 +470,7 @@ treat_spchar <-
     sp_chr <- c("\\.", "\\^", "\\(", "\\)", "\\[", "\\]", "\\{", "\\}", "<", ">",
                 "\\-", "\\+", "\\?", "\\!", "\\*", "\\$", "\\|", "\\&", "\\%")
     for (x in sp_chr) {
-      p <- gsub(x, paste("\\\\Q",x,"\\\\E"), p)
+      p <- gsub(x, paste("\\\\Q",x,"\\\\E",sep=""), p)
     }
     p
   }

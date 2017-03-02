@@ -82,7 +82,9 @@ request <-
     }
 
     if (!is.null(uri_args)) {
-      uri <- do.call(sprintf, as.list(c(uri, uri_args)))
+      # percent encode the args
+      uri_args <- sapply(uri_args, function(x) if (is.na(suppressWarnings(as.numeric(x)))) URLencode(x, reserved = T) else x)
+      uri      <- do.call(sprintf, as.list(c(uri, uri_args)))
     }
 
     if (!is.null(jsondata)) {

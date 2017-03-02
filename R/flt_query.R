@@ -9,7 +9,7 @@ sp_ops <- list(
 
 #' @export
 flt_query <-
-  function(conn, ems_name, new_data = FALSE)
+  function(conn, ems_name, data_file=NULL)
   {
     obj <- list()
     class(obj) <- 'FltQuery'
@@ -17,7 +17,7 @@ flt_query <-
     obj$connection <- conn
     obj$ems        <- ems(conn)
     obj$ems_id     <- get_id(obj$ems, ems_name)
-    obj$flight     <- flight(conn, obj$ems_id, new_data)
+    obj$flight     <- flight(conn, obj$ems_id, data_file)
 
     # object data
     obj$queryset <- list()
@@ -26,6 +26,22 @@ flt_query <-
 
     return(obj)
   }
+
+#' @export
+set_database.FltQuery <-
+  function(qry, name)
+  {
+    qry$flight <- set_database.Flight(qry$flight, name)
+    qry
+  }
+
+#' @export
+get_database.FltQuery <-
+  function(qry)
+  {
+    return( get_database.Flight(qry$flight) )
+  }
+
 
 #' @export
 reset.FltQuery <-
@@ -196,7 +212,7 @@ simple_run.FltQuery <-
     cat("Sending a regular query to EMS ...")
     r <- request(qry$connection, rtype = "POST",
                  uri_keys = c('database', 'query'),
-                 uri_args = c(qry$ems_id, qry$flight$database$id),
+                 uri_args = c(qry$ems_id, qry$flight$db_id),
                  jsondata = qry$queryset)
     cat("Done.\n")
     if ( output == "raw" ) {
@@ -216,7 +232,7 @@ async_run.FltQuery <-
       cat('Sending and opening an async-query to EMS ...\n')
       r <- request(qry$connection, rtype = "POST",
                    uri_keys = c('database', 'open_asyncq'),
-                   uri_args = c(qry$ems_id, qry$flight$database$id),
+                   uri_args = c(qry$ems_id, qry$flight$db_id),
                    jsondata = qry$queryset)
       if (is.null(content(r)$id)) {
         print(headers(r))
@@ -242,7 +258,7 @@ async_run.FltQuery <-
           r <- request(qry$connection, rtype = "GET",
                        uri_keys = c('database', 'get_asyncq'),
                        uri_args = c(qry$ems_id,
-                                    qry$flight$database$id,
+                                    qry$flight$db_id,
                                     async_q$id,
                                     n_row*(ctr-1),
                                     n_row*ctr-1))
@@ -275,7 +291,7 @@ async_run.FltQuery <-
     tryCatch({
       r <- request(qry$connection, rtype = "DELETE",
                    uri_keys = c('database', 'close_asyncq'),
-                   uri_args = c(qry$ems_id, qry$flight$database$id, async_q$id))
+                   uri_args = c(qry$ems_id, qry$flight$db_id, async_q$id))
       cat(sprintf("Async query connection (query ID: %s) deleted.\n", async_q$id))
     }, error = function(e) {
       cat(sprintf("Couldn't delete the async query (query ID: %s). Probably it was already expired.\n", async_q$id))
@@ -305,7 +321,7 @@ run.FltQuery <-
 to_dataframe <-
   function(qry, raw_out)
   {
-    cat("Raw JSON output to R dataframe...")
+    cat("Raw JSON output to R dataframe...\n")
     colname <- sapply(raw_out$header, function(h) h$name)
     coltype <- sapply(qry$columns, function(c) c$type)
     col_id  <- sapply(qry$columns, function(c) c$id)
@@ -346,11 +362,11 @@ to_dataframe <-
         df[ , i] <- as.POSIXct(df[, i], tz="GMT",
                                format = "%Y-%m-%dT%H:%M:%S")
       } else if ( coltype[i] == "discrete" ) {
-        k_map <- list_allvalues(qry$flight, field_id = col_id[i], in_list = T)
+        k_map <- list_allvalues(qry$flight, field_id = col_id[i], in_vec = T)
         if ( length(k_map) == 0 ) {
           df[ , i] <- get_rwy_id(qry, i)
         } else {
-          df[ , i] <- sapply(df[ , i], function(k) k_map[[k]])
+          df[ , i] <- sapply(as.character(df[ , i]), function(k) k_map[k])
         }
       } else if ( coltype[i] == "boolean") {
         df[ , i] <- as.logical(as.integer(df[ , i]))
@@ -371,6 +387,53 @@ get_rwy_id <-
     res <- run(qry)
     res[ , ci]
   }
+
+## --------------------------------------------------------------------------
+## Functions to interface with the flight object
+
+#' @export
+update_dbtree <-
+  function(qry, ...)
+  {
+    path <- unlist(list(...))
+    qry$flight <- update_tree(qry$flight, path, treetype='dbtree')
+    qry
+  }
+
+#' @export
+update_fieldtree <-
+  function(qry, ...)
+  {
+    path <- unlist(list(...))
+    qry$flight <- update_tree(qry$flight, path, treetype='fieldtree')
+    return(qry)
+  }
+
+#' @export
+generate_preset_fieldtree <-
+  function(qry)
+  {
+    qry$flight <- make_default_tree(qry$flight)
+    qry
+  }
+
+#' @export
+save_metadata <-
+  function(qry, file_name = NULL)
+  {
+    save_tree(qry$flight, file_name)
+  }
+
+#' @export
+load_metadata <-
+  function(qry, file_name = NULL)
+  {
+    qry$flight <- load_tree(qry$flight, file_name)
+    return(qry)
+  }
+
+## --------------------------------------------------------------------------
+
 
 ## ---------------------------------------------------------------------------
 ## Filter-related low-level functions
@@ -475,31 +538,4 @@ datetime_filter <-
     return(fltr)
   }
 
-## --------------------------------------------------------------------------
-## Functions to interface with the flight object
-
-#' @export
-update_datatree <-
-  function(qry, ...)
-  {
-    path <- unlist(list(...))
-    qry$flight <- update_tree(qry$flight, path)
-    return(qry)
-  }
-
-#' @export
-save_datatree <-
-  function(qry, file_name = NULL)
-  {
-    save_tree(qry$flight, file_name)
-  }
-
-#' @export
-load_datatree <-
-  function(qry, file_name = NULL)
-  {
-    qry$flight <- load_tree(qry$flight, file_name)
-    return(qry)
-  }
-## --------------------------------------------------------------------------
 

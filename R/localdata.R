@@ -4,8 +4,8 @@ localdata <-
     obj <- list()
     class(obj) <- 'LocalData'
     obj$table_info <- list(fieldtree = c('ems_id','db_id','id','nodetype','type','name','parent_id'),
-                       dbtree    = c('ems_id','id','nodetype','name','parent_id'),
-                       kvmpas    = c('ems_id','id','key','value'))
+                           dbtree    = c('ems_id','id','nodetype','name','parent_id'),
+                           kvmaps    = c('ems_id','id','key','value'))
     if (is.null(dbfile)) {
       obj$dbfile <- file.path(path.package("Rems"),'data', 'emsMetaData.db')
     } else {
@@ -18,7 +18,7 @@ localdata <-
 connect.LocalData <-
   function(ldat)
   {
-    ldat$conn <- dbConn(SQLite(), dbname = ldat$dbfile)
+    ldat$conn <- dbConnect(SQLite(), dbname = ldat$dbfile)
     ldat
   }
 
@@ -60,8 +60,8 @@ get_data <-
       dat <- dbGetQuery(ldat$conn, q)
       return (dat)
     }
-    dat <- data.frame(matrix(NA,nrow=0, ncol=length(flt$table_info[[table_name]])), stringsAsFactors = F)
-    names(dat) <- flt$table_info[[table_name]]
+    dat <- data.frame(matrix(NA,nrow=0, ncol=length(ldat$table_info[[table_name]])), stringsAsFactors = F)
+    names(dat) <- ldat$table_info[[table_name]]
     return (dat)
   }
 
@@ -82,7 +82,7 @@ delete_data <-
 delete_all_tables <-
   function(ldat)
   {
-    for (table_name in names(flt$table_info)) {
+    for (table_name in names(ldat$table_info)) {
       delete_data(ldat, table_name)
     }
   }

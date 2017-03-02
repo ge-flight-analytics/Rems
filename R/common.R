@@ -43,6 +43,11 @@ uris <- list(
   )
 )
 
+#' @export
+set_database <- function(qry, ...) UseMethod("set_database", qry)
+
+#' @export
+get_database <- function(qry, ...) UseMethod("get_database", qry)
 
 #' @export
 reset <- function(qry, ...) UseMethod("reset", qry)
