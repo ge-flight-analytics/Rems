@@ -1,4 +1,10 @@
-uri_root <- 'https://fas.efoqa.com/api'
+
+# uri_root <- 'https://fas.efoqa.com/api'
+uri_root <- list(
+  old = 'https://ems.efoqa.com/api',
+  new = 'https://ceod.efoqa.com/api'
+)
+
 uris <- list(
   sys = list(
     auth = '/token'

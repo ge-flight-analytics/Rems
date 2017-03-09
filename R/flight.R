@@ -69,7 +69,7 @@ get_fieldtree <-
 save_fieldtree <-
   function(flt)
   {
-    if (length(flt$trees$fieldtree) > 0) {
+    if (nrow(flt$trees$fieldtree) > 0) {
       delete_data(flt$metadata, 'fieldtree', sprintf("ems_id = %d and db_id = '%s'", flt$ems_id, flt$db_id))
       append_data(flt$metadata, 'fieldtree', flt$trees$fieldtree)
     }
@@ -80,7 +80,7 @@ get_dbtree <-
   function(flt)
   {
     tr <- get_data(flt$metadata, 'dbtree', paste("ems_id =", flt$ems_id))
-    if (length(tr) < 1) {
+    if (nrow(tr) < 1) {
       dbroot <- list(ems_id = flt$ems_id,
                      id     = "[-hub-][entity-type-group][[--][internal-type-group][root]]",
                      name   = "<root>",
@@ -99,7 +99,7 @@ get_dbtree <-
 save_dbtree <-
   function(flt)
   {
-    if (length(flt$trees$dbtree) > 0) {
+    if (nrow(flt$trees$dbtree) > 0) {
       delete_data(flt$metadata, 'dbtree', sprintf("ems_id = %d", flt$ems_id))
       append_data(flt$metadata, 'dbtree', flt$trees$dbtree)
     }
@@ -116,7 +116,7 @@ get_kvmaps <-
 save_kvmaps <-
   function(flt)
   {
-    if (length(flt$trees$kvmaps) > 0) {
+    if (nrow(flt$trees$kvmaps) > 0) {
       delete_data(flt$metadata, 'kvmaps', sprintf("ems_id = %d", flt$ems_id))
       append_data(flt$metadata, 'kvmaps', flt$trees$kvmaps)
     }
@@ -170,7 +170,7 @@ db_request <-
       d2 <- lapply(d$groups, function(x) list(ems_id    = parent$ems_id,
                                               id        = x$id,
                                               nodetype  = 'database_group',
-                                              name      = x$pluralName,
+                                              name      = x$name,
                                               parent_id = parent$id))
     }
     return(list(d1=d1, d2=d2))
@@ -196,7 +196,7 @@ fl_request <-
       d1 <- lapply(d$fields, function(x) list(ems_id    = parent$ems_id,
                                               db_id     = flt$db_id,
                                                id        = x$id,
-                                               nodetype  = 'fields',
+                                               nodetype  = 'field',
                                                type      = x$type,
                                                name      = x$name,
                                                parent_id = parent$id))
@@ -224,21 +224,21 @@ add_subtree <-
       searchtype <- 'database'
       res <- db_request(flt, parent)
     } else {
-      searchtype <- 'fieldtree'
+      searchtype <- 'field'
       res <- fl_request(flt, parent)
     }
 
     if (length(res$d1) > 0) {
       flt$trees[[treetype]] <- rbind(flt$trees[[treetype]], lls_to_df(res$d1), stringsAsFactors=F)
       plural <- if (length(res$d1) > 1) "s" else ""
-      cat(sprintf("-- Added %d %s%s\n", length(res$d1), searctype, plural))
+      cat(sprintf("-- Added %d %s%s\n", length(res$d1), searchtype, plural))
     }
 
 
     for (x in res$d2) {
       flt$trees[[treetype]] <- rbind(flt$trees[[treetype]], x, stringsAsFactors=F)
-      if ( (length(exclude_tree) == 0) || (all(sapply(exclude_tree, function(x) !grepl(x, x$name)))) ) {
-        flt <- add_subtree(flt, exclude_tree, treetype)
+      if ( (length(exclude_tree) == 0) || (all(sapply(exclude_tree, function(et) !grepl(et, x$name)))) ) {
+        flt <- add_subtree(flt, x, exclude_tree, treetype)
       }
     }
     flt
@@ -260,7 +260,7 @@ remove_subtree <-
 
 
     # Update the instance tree by deleting children
-    flt$trees[[treetype]] <- tr[tr$parent_id != parent_id, ]
+    flt$trees[[treetype]] <- tr[tr$parent_id != parent$id, ]
 
     # Iterate and do recursive removal of children of children
     leaftype <- if (treetype=='fieldtree') 'field' else 'database'
@@ -294,7 +294,7 @@ update_children <-
     if (length(res$d1) > 0) {
       flt$trees[[treetype]] <- rbind(flt$trees[[treetype]], lls_to_df(res$d1), stringsAsFactors=F)
       plural <- if (length(res$d1) > 1) "s" else ""
-      cat(sprintf("-- Added %d %s%s\n", length(res$d1), searctype, plural))
+      cat(sprintf("-- Added %d %s%s\n", length(res$d1), searchtype, plural))
     }
     # If there is an array of groups as children add any that appeared new and remove who does not.
     old_groups <- subset(tr, (nodetype==paste(searchtype, "group", sep="_")) & (parent_id==parent$id))
@@ -323,7 +323,7 @@ update_children <-
 update_tree <-
   function(flt, path, exclude_tree = c(), treetype=c('fieldtree','dbtree'))
   {
-    searchtype <- if(treetype=="field") 'fieldtree' else 'dbtree'
+    searchtype <- if(treetype=="fieldtree") 'field' else 'database'
 
     path <- tolower(path)
     for ( i in seq_along(tolower(path)) ) {

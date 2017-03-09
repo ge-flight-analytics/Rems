@@ -4,10 +4,12 @@
 #' @param usr String, FOQA username
 #' @param pwd String, FOQA password
 #' @param proxies List containing the system proxy information. The list contains attributes "url", "port", "usr", "pwd"
+#' @param server String, temporary parameter that let you choose an API server. Currently "old" (2-node), "new" (3-node now but eventually grow to 24 nodes)
 #' @return a Connection object.
+
 #' @export
 connect <-
-  function(usr, pwd, proxies = NULL)
+  function(usr, pwd, proxies = NULL, server = 'old')
   {
     # Prevent from the Peer certificate error ("Error in curl::curl_fetch_memory(url, handle = handle) :
     # Peer certificate cannot be authenticated with given CA certificates")
@@ -17,7 +19,7 @@ connect <-
     body <- list(grant_type = "password",
                 username   = usr,
                 password   = pwd)
-    uri = paste(uri_root, uris$sys$auth, sep="")
+    uri = paste(uri_root[[server]], uris$sys$auth, sep="")
 
     if (is.null(proxies)) {
       r <- POST(uri,
@@ -38,6 +40,7 @@ connect <-
     c <- list(
       foqa = list(usr=usr, pwd=pwd),
       proxies = proxies,
+      uri_root = uri_root[[server]],
       token = content(r)$access_token,
       token_type = content(r)$token_type
     )
@@ -48,7 +51,8 @@ connect <-
 reconnect <-
   function(conn)
   {
-    return(connect(conn$foqa$usr, conn$foqa$pwd, proxies = conn$proxies))
+    server_name = names(uri_root[uri_root==conn$uri_root])
+    return(connect(conn$foqa$usr, conn$foqa$pwd, proxies = conn$proxies), server = server_name)
   }
 
 
@@ -76,7 +80,7 @@ request <-
     }
 
     if (!is.null(uri_keys)) {
-      uri <- paste(uri_root,
+      uri <- paste(conn$uri_root,
                    uris[[uri_keys[1]]][[uri_keys[2]]],
                    sep = "")
     }
