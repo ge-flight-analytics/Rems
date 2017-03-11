@@ -59,7 +59,7 @@ search_fields <-
             f[i] <- gsub(x, paste("\\", x, sep=""), f[i])
           }
           names   <- tolower(chld$name)
-          node_id <- chld[(f[i]==names) | grep(f[i], names, ignore.case = T), 'id']
+          node_id <- chld[(f[i]==names) | grepl(f[i], names, ignore.case = T), 'id']
           if (i < length(f)) {
             chld    <- subset(flt$tree, parent %in% node_id)
           } else {
