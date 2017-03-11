@@ -424,7 +424,7 @@ list_allvalues <-
       km <- content(r)$discreteValues
       kmap <- data.frame(ems_id=flt$ems_id,
                          id    =fld_id,
-                         key   =names(km),
+                         key   =as.integer(names(km)),
                          value =unlist(km, use.names = F), stringsAsFactors=F)
       flt$trees$kvmaps <- rbind(flt$trees$kvmaps, kmap)
       save_kvmaps(flt)
