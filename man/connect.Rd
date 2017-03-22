@@ -4,7 +4,7 @@
 \alias{connect}
 \title{Connect to EMS and get the Auth token}
 \usage{
-connect(usr, pwd, proxies = NULL)
+connect(usr, pwd, proxies = NULL, server = "old", server_url = NULL)
 }
 \arguments{
 \item{usr}{String, FOQA username}
@@ -12,6 +12,8 @@ connect(usr, pwd, proxies = NULL)
 \item{pwd}{String, FOQA password}
 
 \item{proxies}{List containing the system proxy information. The list contains attributes "url", "port", "usr", "pwd"}
+
+\item{server}{String, temporary parameter that let you choose an API server. Currently "old" (2-node), "new" (3-node now but eventually grow to 24 nodes)}
 }
 \value{
 a Connection object.

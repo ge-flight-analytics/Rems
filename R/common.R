@@ -1,8 +1,11 @@
 
 # uri_root <- 'https://fas.efoqa.com/api'
 uri_root <- list(
-  old = 'https://ems.efoqa.com/api',
-  new = 'https://ceod.efoqa.com/api'
+  prod       = 'https://ems.efoqa.com/api',
+  cluster    = 'https://ceod.efoqa.com/api',
+  stable     = 'https://emsapi.ausdig.com/api',
+  beta       = 'https://emsapibeta.ausdig.com/api',
+  nightly    = 'https://emsapitest.ausdig.com/api'
 )
 
 uris <- list(
