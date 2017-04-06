@@ -25,7 +25,7 @@ load_tree <-
     if (is.null(flt$metadata)) {
       flt$metadata <- localdata(file_name)
     } else {
-      if ((!is.null(file_name)) && (flt$metadata.file_loc(flt$metadata) != file.path(file_name))) {
+      if ((!is.null(file_name)) && (file_loc(flt$metadata) != file.path(file_name))) {
         close.LocalData(flt$metadata)
         flt$metadata <- localdata(file_name)
       }

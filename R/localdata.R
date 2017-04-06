@@ -5,7 +5,9 @@ localdata <-
     class(obj) <- 'LocalData'
     obj$table_info <- list(fieldtree = c('ems_id','db_id','id','nodetype','type','name','parent_id'),
                            dbtree    = c('ems_id','id','nodetype','name','parent_id'),
-                           kvmaps    = c('ems_id','id','key','value'))
+                           kvmaps    = c('ems_id','id','key','value'),
+                           params    = c('ems_id','id','name','description','units'))
+
     if (is.null(dbfile)) {
       obj$dbfile <- file.path(path.package("Rems"),'data', 'emsMetaData.db')
     } else {

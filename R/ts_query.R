@@ -1,6 +1,6 @@
 #' @export
 tseries_query <-
-  function(conn, ems_name, new_data = FALSE)
+  function(conn, ems_name, data_file = NULL)
   {
     obj <- list()
     class(obj) <- 'TsQuery'
@@ -9,7 +9,7 @@ tseries_query <-
     obj$connection <- conn
     obj$ems        <- ems(conn)
     obj$ems_id     <- get_id(obj$ems, ems_name)
-    obj$analytic   <- analytic(conn, obj$ems_id, new_data)
+    obj$analytic   <- analytic(conn, obj$ems_id, data_file)
 
     # object data
     obj$queryset <- list()
@@ -23,7 +23,7 @@ tseries_query <-
 reset.TsQuery <-
   function(qry)
   {
-    qry$queryset <- list()
+    qry$queryset <- list(select = list())
     qry$columns <- list()
     qry
   }
@@ -53,6 +53,8 @@ select.TsQuery <-
       }
       # Add the selected param into the query set
       n_sel <- length(qry$columns)
+      qry$queryset$select[[n_sel+1]] <- list(analyticId = prm$id)
+      # Just in case you need information of the selected params
       qry$columns[[n_sel+1]] <- prm
     }
     if ( save_table) {
@@ -63,45 +65,92 @@ select.TsQuery <-
 
 #' @export
 range <-
-  function(qry, tstart, tend)
+  function(qry, tstart = NULL, tend = NULL)
   {
-    if ( !is.numeric(c(tstart, tend)) ) {
-      stop(sprintf("The values for time range should be numeric. Given values are from %s to %s.", tstart, tend))
-    }
+    # if ( !is.numeric(c(tstart, tend)) ) {
+    #   stop(sprintf("The values for time range should be numeric. Given values are from %s to %s.", tstart, tend))
+    # }
     qry$queryset[["start"]] <- tstart
     qry$queryset[["end"]]   <- tend
     return(qry)
   }
 
+timepoint <-
+  function(qry, tpoint)
+  {
+    if (!is.vector(tpoint)) {
+      stop("Timepoint should be given as a vector type.")
+    }
+    qry$queryset$offsets <- tpoint
+    return(qry)
+  }
+
+# flight_duration <-
+#   function(qry, flight, unit = "second")
+#   {
+#     prm <- get_param(qry$analytic, "hours of data (hours)")
+#     q <- list(select = list(analyticId = prm$id),
+#               size = 1)
+#     r <- request(qry$connection, rtype="POST",
+#                  uri_keys = c("analytic", "query"),
+#                  uri_args = c(qry$ems_id, flight),
+#                  jsondata = q)
+#     res <- content(r)
+#     if ( !is.null(res$message) ) {
+#       stop(sprintf('API query for flight = %s, parameter = "%s" was unsuccessful.\nHere is the massage from API: %s',
+#                    flight, prm$name, res$message))
+#     }
+#     fl_len <- res$results[[1]][['values']][[1]]
+#
+#     if (unit=="second") {
+#       y <- fl_len * 60 * 60
+#     } else if (unit=="minute") {
+#       y <- fl_len * 60
+#     } else if (unit=="hour") {
+#       y <- fl_len
+#     } else {
+#       stop(sprintf('Unrecognizable time unit (%s).', unit))
+#     }
+#     return(y)
+#   }
+
 #' @export
 run.TsQuery <-
-  function(qry, flight, start = NULL, end = NULL, timepoint = NULL)
+  function(qry, flight, start = NULL, end = NULL, timestep = NULL, timepoint = NULL)
   {
+    if (!is.null(timepoint)) {
+      qry <- timepoint(qry, timepoint)
+    } else if (!is.null(timestep)) {
+      start <- if (is.null(start)) 0.0 else start
+      if (is.null(end)) {
+        stop("End timepoint should be given along with timestep input.")
+      }
+      qry <- timepoint(qry, seq(start, end, by = timestep))
+    } else {
+      qry <- range(qry, start, end)
+    }
+
+    r <- request(qry$connection, rtype="POST",
+                 uri_keys = c("analytic", "query"),
+                 uri_args = c(qry$ems_id, flight),
+                 jsondata = qry$queryset)
+    res <- content(r)
+    if ( !is.null(res$message) ) {
+      stop(sprintf('API query for flight = %s was unsuccessful.\nHere is the massage from API: %s',
+                   flight, res$message))
+    }
+
+    df <- data.frame(unlist(res$offsets))
+    names(df) <- "Time (sec)"
+
     for (i in seq_along(qry$columns)) {
-      if ( !(is.null(start) || is.null(end)) ) {
-        qry <- range(qry, start, end)
-      }
-      if ( !is.null(timepoint) ) {
-        warning("run.TsQuery: Defining time points is not yet supported.")
-      }
-      p <- qry$columns[[i]]
-      q <- qry$queryset
-      q$select <- list(list(analyticId = p$id))
-      r <- request(qry$connection, rtype="POST",
-                   uri_keys = c("analytic", "query"),
-                   uri_args = c(qry$ems_id, flight),
-                   jsondata = q)
-      res <- content(r)
-      if ( !is.null(res$message) ) {
-        stop(sprintf('API query for flight = %s, parameter = "%s" was unsuccessful.\nHere is the massage from API: %s',
-                     flight, p$name, res$message))
-      }
-      if (i == 1) {
-        df <- data.frame(unlist(res$offsets))
-        names(df) <- "Time (sec)"
-      }
-      df <- cbind(df, unlist(res$results[[1]]$values))
-      names(df)[i+1] <- p$name
+      # Unfortunately, httr's content function fills the emspty data as NULL in the list, instead of NA.
+      # This causes discrepancies in # of rows when there are nulls in the raw json data since unlist
+      # function simply ignore the list elements with NULL ending up returning a vector that is shorter
+      # then it should be.
+      prm_vals <- unlist(sapply(res$results[[i]]$values, function(x) if(is.null(x)) NA else x))
+      df <- cbind(df, prm_vals)
+      names(df)[i+1] <- qry$columns[[i]]$name
     }
     return(df)
   }
@@ -121,6 +170,7 @@ run_multiflts <-
     } else {
       FR <- flight
     }
+
     cat(sprintf("=== Start running time series data querying for %d flights ===\n", length(FR)))
     for (i in 1:length(FR)) {
       cat(sprintf("%d / %d: FR %d\n", i, length(FR), FR[i]))
