@@ -380,7 +380,7 @@ flt <- run(fq)
 # === Run time series query for each flight ===
 
 # Instantiate a time-series query for the same EMS9
-tsq <- tseries_query(conn, "ems9")
+tsq <- tseries_query(conn, "ems9", data_file = "demo.db")
 
 # Select 7 example time-series params that will be retrieved for each of the 10 flights
 tsq <- select(tsq, "baro-corrected altitude", "airspeed (calibrated; 1 or only)", "ground speed (best avail)",
