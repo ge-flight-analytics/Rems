@@ -1,4 +1,13 @@
-uri_root <- 'https://fas.efoqa.com/api'
+
+# uri_root <- 'https://fas.efoqa.com/api'
+uri_root <- list(
+  prod       = 'https://ems.efoqa.com/api',
+  cluster    = 'https://ceod.efoqa.com/api',
+  stable     = 'https://emsapi.ausdig.com/api',
+  beta       = 'https://emsapibeta.ausdig.com/api',
+  nightly    = 'https://emsapitest.ausdig.com/api'
+)
+
 uris <- list(
   sys = list(
     auth = '/token'
@@ -43,6 +52,11 @@ uris <- list(
   )
 )
 
+#' @export
+set_database <- function(qry, ...) UseMethod("set_database", qry)
+
+#' @export
+get_database <- function(qry, ...) UseMethod("get_database", qry)
 
 #' @export
 reset <- function(qry, ...) UseMethod("reset", qry)

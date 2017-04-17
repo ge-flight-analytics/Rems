@@ -4,10 +4,12 @@
 #' @param usr String, FOQA username
 #' @param pwd String, FOQA password
 #' @param proxies List containing the system proxy information. The list contains attributes "url", "port", "usr", "pwd"
+#' @param server String, temporary parameter that let you choose an API server. Currently "old" (2-node), "new" (3-node now but eventually grow to 24 nodes)
 #' @return a Connection object.
+
 #' @export
 connect <-
-  function(usr, pwd, proxies = NULL)
+  function(usr, pwd, proxies = NULL, server = 'prod', server_url = NULL)
   {
     # Prevent from the Peer certificate error ("Error in curl::curl_fetch_memory(url, handle = handle) :
     # Peer certificate cannot be authenticated with given CA certificates")
@@ -17,7 +19,9 @@ connect <-
     body <- list(grant_type = "password",
                 username   = usr,
                 password   = pwd)
-    uri = paste(uri_root, uris$sys$auth, sep="")
+
+    sel_uri_root <- if (is.null(server_url)) uri_root[[server]] else server_url
+    uri = paste(sel_uri_root, uris$sys$auth, sep="")
 
     if (is.null(proxies)) {
       r <- POST(uri,
@@ -36,10 +40,11 @@ connect <-
     }
 
     c <- list(
-      foqa = list(usr=usr, pwd=pwd),
-      proxies = proxies,
-      token = content(r)$access_token,
-      token_type = content(r)$token_type
+      foqa      = list(usr=usr, pwd=pwd),
+      proxies   = proxies,
+      uri_root  = sel_uri_root,
+      token     = content(r)$access_token,
+      token_type= content(r)$token_type
     )
     c
   }
@@ -48,7 +53,8 @@ connect <-
 reconnect <-
   function(conn)
   {
-    return(connect(conn$foqa$usr, conn$foqa$pwd, proxies = conn$proxies))
+    # server_name = names(uri_root[uri_root==conn$uri_root])
+    return(connect(conn$foqa$usr, conn$foqa$pwd, proxies = conn$proxies, server_url = conn$uri_root))
   }
 
 
@@ -76,13 +82,15 @@ request <-
     }
 
     if (!is.null(uri_keys)) {
-      uri <- paste(uri_root,
+      uri <- paste(conn$uri_root,
                    uris[[uri_keys[1]]][[uri_keys[2]]],
                    sep = "")
     }
 
     if (!is.null(uri_args)) {
-      uri <- do.call(sprintf, as.list(c(uri, uri_args)))
+      # percent encode the args
+      uri_args <- sapply(uri_args, function(x) if (is.na(suppressWarnings(as.numeric(x)))) URLencode(x, reserved = T) else x)
+      uri      <- do.call(sprintf, as.list(c(uri, uri_args)))
     }
 
     if (!is.null(jsondata)) {
