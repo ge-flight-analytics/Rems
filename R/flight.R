@@ -376,9 +376,11 @@ search_fields <-
         chld <- flt$trees$fieldtree
         for ( i in seq_along(f) ) {
           ff <- treat_spchar(f[i])
-          parent_id <- subset(chld, grepl(ff, name, ignore.case = T))$id
           if (i < length(f)) {
-            chld    <- chld[chld$parent_id %in% parent_id, ]
+            chld      <- chld[chld$nodetype == "field_group", ]
+            parent_id <- subset(chld, grepl(ff, name, ignore.case = T))$id
+            tr      <- flt$trees$fieldtree
+            chld    <- tr[tr$parent_id %in% parent_id, ]
           } else {
             chld    <- subset(chld, (nodetype=='field') & grepl(ff, name, ignore.case = T) )
           }
@@ -402,22 +404,27 @@ search_fields <-
 list_allvalues <-
   function(flt, field = NULL, field_id = NULL, in_vec=FALSE, in_df=FALSE)
   {
-    fld_id <- field_id
+
 
     if ( is.null(field_id) ) {
       fld <- search_fields(flt, field)[[1]]
       fld_type <- fld$type
       fld_id   <- fld$id
+      fld_name <- fld$name
       if ( fld_type != "discrete" )  {
         stop("Queried field should be discrete type to get the list of possible values.")
       }
+    } else {
+      fld_id   <- field_id
+      fld_name <- subset(flt$trees$fieldtree, id==fld_id)$name
     }
+
 
     tr <- flt$trees$kvmaps
     kmap <- subset(tr, (ems_id==flt$ems_id) & (id==fld_id))
 
     if (nrow(kmap)==0) {
-      cat("Getting key-value mappings from API. (Caution: runway ID takes much longer)\n")
+      cat(sprintf("%s: Getting key-value mappings from API. (Caution: Some fields take a very long time)\n", fld_name))
       r <- request(flt$connection,
                    uri_keys = c('database', 'field'),
                    uri_args = c(flt$ems_id, flt$db_id, fld_id))
