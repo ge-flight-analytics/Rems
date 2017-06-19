@@ -157,7 +157,7 @@ run.TsQuery <-
 
 #' @export
 run_multiflts <-
-  function(qry, flight, start = NULL, end = NULL, timepoint = NULL)
+  function(qry, flight, start = NULL, end = NULL, timestep = NULL, timepoint = NULL)
   {
 
     # input argument "flight" as multi-column data
@@ -171,6 +171,11 @@ run_multiflts <-
       FR <- flight
     }
 
+    if (!is.null(timepoint)) {
+      cat("Time points are not yet supported. The given time points will be ignored.\n")
+      timepoint = NULL
+    }
+
     cat(sprintf("=== Start running time series data querying for %d flights ===\n", length(FR)))
     for (i in 1:length(FR)) {
       cat(sprintf("%d / %d: FR %d\n", i, length(FR), FR[i]))
@@ -180,7 +185,7 @@ run_multiflts <-
       } else {
         res[[i]]$flt_data <- list("Flight Record" = FR[i])
       }
-      res[[i]]$ts_data <- run.TsQuery(qry, FR[i], start = start[i], end = end[i], timepoint = timepoint[i])
+      res[[i]]$ts_data <- run.TsQuery(qry, FR[i], start = start[i], end = end[i], timestep = timestep[i])
     }
     return(res)
   }

@@ -129,7 +129,11 @@ set_database.Flight <-
     tr <- flt$trees$dbtree
     flt$db_id <- tr[tr$nodetype=="database" & grepl(treat_spchar(dbname), tr$name, ignore.case=T), 'id']
     flt$trees$fieldtree <- get_fieldtree(flt)
-    flt <- update_children(flt, get_database.Flight(flt), treetype= "fieldtree")
+
+    if (nrow(flt$trees$fieldtree)) {
+      flt <- update_children(flt, get_database.Flight(flt), treetype= "fieldtree")
+    }
+
     cat(sprintf("Using database '%s'.\n", get_database.Flight(flt)$name))
     flt
   }
