@@ -8,6 +8,8 @@ uri_root <- list(
   nightly    = 'https://emsapitest.ausdig.com/api'
 )
 
+user_agent <- 'ems-api-sdk R v0.2'
+
 uris <- list(
   sys = list(
     auth = '/token'

@@ -15,7 +15,7 @@ connect <-
     # Peer certificate cannot be authenticated with given CA certificates")
     httr::set_config( config( ssl_verifypeer = 0 ) )
 
-    header <- c("Content-Type" = "application/x-www-form-urlencoded")
+    header <- c("Content-Type" = "application/x-www-form-urlencoded", "User-Agent" = user_agent)
     body <- list(grant_type = "password",
                 username   = usr,
                 password   = pwd)
@@ -78,7 +78,7 @@ request <-
     }
 
     if (is.null(headers)) {
-      headers <- c(Authorization = paste(conn$token_type, conn$token))
+      headers <- c(Authorization = paste(conn$token_type, conn$token), 'User-Agent' = user_agent)
     }
 
     if (!is.null(uri_keys)) {
