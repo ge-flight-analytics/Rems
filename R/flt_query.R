@@ -116,6 +116,9 @@ filter <-
     n_fltr   <- length(qry$queryset$filter$args)
     qry$queryset$filter$args[[n_fltr + 1]] <- a_fltr
 
+    # Update kvmaps (temp measure. Change the design (see list_allvalues))
+    qry$flight$trees$kvmaps <- get_kvmaps(qry$flight)
+
     return(qry)
   }
 
@@ -260,8 +263,8 @@ async_run.FltQuery <-
                        uri_args = c(qry$ems_id,
                                     qry$flight$db_id,
                                     async_q$id,
-                                    n_row*(ctr-1),
-                                    n_row*ctr-1))
+                                    formatC(n_row*(ctr-1), format="d"),
+                                    formatC(n_row*ctr-1, format="d")))
           if (is.null(content(r)$rows)) {
             # Reopen the query if not returning data
             async_q <- open_async_query()
@@ -363,11 +366,17 @@ to_dataframe <-
                                format = "%Y-%m-%dT%H:%M:%S")
       } else if ( coltype[i] == "discrete" ) {
         k_map <- list_allvalues(qry$flight, field_id = col_id[i], in_vec = T)
-        if ( length(k_map) == 0 ) {
-          df[ , i] <- get_rwy_id(qry, i)
-        } else {
-          df[ , i] <- sapply(as.character(df[ , i]), function(k) k_map[k])
-        }
+        # Sometimes k_map is a very large table making "replace" operation
+        # very slow. Just grap kv-maps subset that are present in the target
+        # dataframe
+        k_map <- k_map[names(k_map) %in% unique(df[ , i])]
+        df[ , i] <- sapply(as.character(df[ , i]), function(k) k_map[k])
+        # == Old code ==
+        # if ( length(k_map) == 0 ) {
+        #   df[ , i] <- get_rwy_id(qry, i)
+        # } else {
+        #   df[ , i] <- sapply(as.character(df[ , i]), function(k) k_map[k])
+        # }
       } else if ( coltype[i] == "boolean") {
         df[ , i] <- as.logical(as.integer(df[ , i]))
       }

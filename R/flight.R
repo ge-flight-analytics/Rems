@@ -410,6 +410,12 @@ list_allvalues <-
   {
 
 
+    # There is a very bad design. The updated kvmaps table is stored in the flt object,
+    # but it is never passed to the outside so the global object doesn't update!!!
+    # I'll put reloading kvmaps from localdata as a temp measure (see to_dataframe),
+    # but it may have to be redesigned. Maybe split into two functions,
+    #   flt <-update_kvmaps(flt, ...)
+    #   val <-list_allvalues(flt, ...)
     if ( is.null(field_id) ) {
       fld <- search_fields(flt, field)[[1]]
       fld_type <- fld$type
@@ -423,7 +429,7 @@ list_allvalues <-
       fld_name <- subset(flt$trees$fieldtree, id==fld_id)$name
     }
 
-
+    flt$trees$kvmaps <- get_kvmaps(flt)
     tr <- flt$trees$kvmaps
     kmap <- subset(tr, (ems_id==flt$ems_id) & (id==fld_id))
 
