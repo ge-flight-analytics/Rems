@@ -336,28 +336,20 @@ to_dataframe <-
                       sapply(r, function(rr) ifelse(is.null(rr), NA, rr))
                     })
 
-    df <- data.frame(matrix(NA, nrow=length(raw_out$rows), ncol=length(colname)),
-                     stringsAsFactors = F)
+    # df <- data.frame(matrix(NA, nrow=length(raw_out$rows), ncol=length(colname)),
+    #                  stringsAsFactors = F)
+    # names(df) <- colname
+    # for ( i in 1:nrow(df) ) {
+    #   df[i, ] <- ldata[[i]]
+    # }
+    df <- data.frame(do.call(rbind, ldata), stringsAsFactors = F)
     names(df) <- colname
-    for ( i in 1:nrow(df) ) {
-      df[i, ] <- ldata[[i]]
-    }
 
     if ( qry$queryset$format == 'display') {
       cat('Done.\n')
       return(df)
     }
     # Do the dirty work of casting a right type for each column of the data
-    # Note
-    # ====
-    # Runway IDs are discrete data but their key-value mapping is not provided
-    # because the mapping itself is quite big in size (45K entries). That means
-    # the regular routines to handle the discrete data won't work. As a result
-    # the discrete data routine has a dirty, custom routine particularly for
-    # the runway IDs. What it basically does is to send a separate but redundant
-    # query for runway IDs with "queryset$format = display", and then push the
-    # this query result at the runway ID column of the original query result.
-    # I know this is crappy but it seems the best way I could find.
     for ( i in seq_along(coltype) ) {
       if ( coltype[i] == 'number' ) {
         df[ , i] <- as.numeric(df[ , i])
