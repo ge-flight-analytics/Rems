@@ -123,7 +123,7 @@ save_kvmaps <-
   }
 
 
-set_database.Flight <-
+set_database_old.Flight <-
   function(flt, dbname)
   {
     tr <- flt$trees$dbtree
@@ -138,6 +138,25 @@ set_database.Flight <-
     flt
   }
 
+set_database.Flight <-
+  function(flt, dbname)
+  {
+    tr <- flt$trees$dbtree
+    db_list <- tr[tr$nodetype=="database" & grepl(treat_spchar(dbname), tr$name, ignore.case=T), c('id', 'name')]
+    if (length(db_list)>1) {
+      flt$db_id <- db_list[order(nchar(db_list$name))[1], "id"]
+    } else {
+      flt$db_id <- db_list$id
+    }
+    flt$trees$fieldtree <- get_fieldtree(flt)
+
+    if (nrow(flt$trees$fieldtree)) {
+      flt <- update_children(flt, get_database.Flight(flt), treetype= "fieldtree")
+    }
+
+    cat(sprintf("Using database '%s'.\n", get_database.Flight(flt)$name))
+    flt
+  }
 
 get_database.Flight <-
   function(flt)
