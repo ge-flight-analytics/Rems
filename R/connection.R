@@ -78,7 +78,9 @@ request <-
     }
 
     if (is.null(headers)) {
-      headers <- c(Authorization = paste(conn$token_type, conn$token), 'User-Agent' = user_agent)
+      headers <- c(Authorization = paste(conn$token_type, conn$token),
+                   'Accept-Encoding' = 'gzip',
+                   'User-Agent' = user_agent)
     }
 
     if (!is.null(uri_keys)) {

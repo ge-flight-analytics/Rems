@@ -4,7 +4,7 @@
 \alias{connect}
 \title{Connect to EMS and get the Auth token}
 \usage{
-connect(usr, pwd, proxies = NULL, server = "old", server_url = NULL)
+connect(usr, pwd, proxies = NULL, server = "prod", server_url = NULL)
 }
 \arguments{
 \item{usr}{String, FOQA username}
