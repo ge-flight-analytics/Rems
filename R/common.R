@@ -5,7 +5,8 @@ uri_root <- list(
   cluster    = 'https://ceod.efoqa.com/api',
   stable     = 'https://emsapi.ausdig.com/api',
   beta       = 'https://emsapibeta.ausdig.com/api',
-  nightly    = 'https://emsapitest.ausdig.com/api'
+  nightly    = 'https://emsapitest.ausdig.com/api',
+  ctc        = 'https://ems.cn.efoqa.com/api'
 )
 
 user_agent <- 'ems-api-sdk R v0.2'
