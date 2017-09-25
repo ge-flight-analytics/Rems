@@ -126,7 +126,7 @@ filter <-
 split_expr <-
   function(expr)
   {
-    for ( pattern in c( "[=!<>]=?", names(sp_ops) ) ) {
+    for ( pattern in c( names(sp_ops), "[=!<>]=?" ) ) {
       l <- regexpr(pattern, expr)
       if (l[1]!=-1) break
     }
