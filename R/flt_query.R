@@ -126,10 +126,11 @@ filter <-
 split_expr <-
   function(expr)
   {
-    for ( pattern in c( names(sp_ops), "[=!<>]=?" ) ) {
-      l <- regexpr(pattern, expr)
-      if (l[1]!=-1) break
-    }
+    # for ( pattern in c( names(sp_ops), "[=!<>]=?" ) ) {
+    #   l <- regexpr(pattern, expr)
+    #   if (l[1]!=-1) break
+    # }
+    l <- regexpr(" in | not in |[=!<>]=?", expr)
     op <- substring(expr, l[1], l[1] + attr(l, "match.length") - 1)
     lr <- strsplit(expr, op)[[1]]
     return(list(
