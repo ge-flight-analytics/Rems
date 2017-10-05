@@ -5,7 +5,7 @@ Version: 0.2.0
 Authors@R: person("Kyungjin", "Moon", email = "kyungjin.moon@ge.com", role = c("aut", "cre"))
 Description: The package is a wrapper of the RESTful API to ADI's EMS Data
     System.
-License: GE Proprietary
+License: MIT License
 LazyData: TRUE
 Depends:
     R (>= 3.2.3),
