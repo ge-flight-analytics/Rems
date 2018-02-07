@@ -41,11 +41,11 @@ conn <- connect({efoqa_usr},
 ```
 With optional `server` argument, you can select one of the currently available EMS API servers, which are:
 * "prod" (default)
-* "cluster" (clustered production version)
+* "cluster" (Engine Services production version)
 * "stable" (stable test version)
-* "beta" 
-
-* "nightly"
+* "beta" (beta test version)
+* "nightly" (nightly upgraded test version)
+* "ctc" (Shanghai production version)
 ## Flight Querying
 
 ### Instantiate Query
