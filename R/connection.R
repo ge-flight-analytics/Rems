@@ -4,7 +4,7 @@
 #' @param usr String, FOQA username
 #' @param pwd String, FOQA password
 #' @param proxies List containing the system proxy information. The list contains attributes "url", "port", "usr", "pwd"
-#' @param server String, temporary parameter that let you choose an API server. Currently "old" (2-node), "new" (3-node now but eventually grow to 24 nodes)
+#' @param server String, parameter that lets you choose an API server. See common.R for options.
 #' @return a Connection object.
 
 #' @export
