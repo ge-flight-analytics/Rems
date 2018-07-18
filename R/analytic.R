@@ -1,4 +1,4 @@
-
+#'@export
 analytic <-
   function(conn, ems_id, data_file = NULL)
   {
@@ -39,7 +39,7 @@ save_paramtable <-
     }
   }
 
-
+#'@export
 search_param <-
   function(anal, keyword)
   {
@@ -65,7 +65,7 @@ search_param <-
     return(prm)
   }
 
-
+#'@export
 get_param <-
   function(anal, keyword, unique = T)
   {

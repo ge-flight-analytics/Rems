@@ -1,3 +1,4 @@
+#'@export
 ems <- function(conn) {
   obj <- list()
   class(obj) <- "ems"
@@ -19,7 +20,7 @@ update_list <- function(obj) {
   return(obj)
 }
 
-
+#'@export
 get_id <- function(obj, name) {
   name <- toupper(name)
   x <- obj$list$id[toupper(obj$list$name)==name]
@@ -31,7 +32,7 @@ get_id <- function(obj, name) {
   return(x)
 }
 
-
+#'@export
 get_name <- function(obj, id) {
   return(obj$name[obj$id==id])
 }

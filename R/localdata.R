@@ -1,3 +1,4 @@
+#'@export
 localdata <-
   function(dbfile = NULL)
   {
@@ -24,7 +25,7 @@ connect.LocalData <-
     ldat
   }
 
-
+#'@export
 check_colnames <-
   function(ldat, table_name, dat)
   {
@@ -35,7 +36,7 @@ check_colnames <-
     }
   }
 
-
+#'@export
 close.LocalData <-
   function(ldat)
   {
@@ -50,7 +51,7 @@ append_data <-
     dbWriteTable(ldat$conn, table_name, dat, append = T, row.names = F)
   }
 
-
+#'@export
 get_data <-
   function(ldat, table_name, condition = NULL)
   {
@@ -89,7 +90,7 @@ delete_all_tables <-
     }
   }
 
-
+#'@export
 file_loc <-
   function(ldat)
   {
