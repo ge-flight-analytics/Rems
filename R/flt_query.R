@@ -533,7 +533,7 @@ datetime_filter <-
     if ( op %in% names(date_ops) ) {
       t_op <- date_ops[[op]]
     } else {
-      stop(sprintf("%s: Unsupported conditional operator for discrete fields.", op))
+      stop(sprintf("%s: Unsupported conditional operator for date time fields.", op))
     }
     val_info <- c(val_info, list(list(type="constant", value="Utc")))
     fltr     <- filter_fmt(t_op, field_info, val_info)
