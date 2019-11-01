@@ -43,13 +43,14 @@ uris <- list(
     query = '/v2/ems-systems/%s/databases/%s/query',
     open_asyncq	= '/v2/ems-systems/%s/databases/%s/async-query', #(ems-system_id, database_id)
     get_asyncq = '/v2/ems-systems/%s/databases/%s/async-query/%s/read/%s/%s', #(ems-system_id, database_id, async_query_id, start_row, end_row)
-    close_asyncq = '/v2/ems-systems/%s/databases/%s/async-query/%s'
+    close_asyncq = '/v2/ems-systems/%s/databases/%s/async-query/%s',
+    create = '/v2/ems-systems/%s/databases/%s/create' # (emsSystemId, databaseId)
   ),
   analytic = list(
     search   = '/v2/ems-systems/%s/analytics',    # (emsSystemId)
     search_f = '/v2/ems-systems/%s/flights/%s/analytics', # (emsSystemId, flightId)
     group    = '/v2/ems-systems/%s/analytic-groups',    # (emsSystemId)
-    group_f  = '/v2/ems-systems/%s/flights/%s/analytic-groups', # (emsSystemId, flightId)
+    group_f  = '/v2/ems-systems/R%s/flights/%s/analytic-groups', # (emsSystemId, flightId)
     query    = '/v2/ems-systems/%s/flights/%s/analytics/query', # (emsSystemId, flightId)
     metadata = '/v2/ems-systems/%s/flights/%s/analytics/metadata' # (emsSystemId, flightId)
   )
