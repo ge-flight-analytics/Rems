@@ -50,7 +50,7 @@ uris <- list(
     search   = '/v2/ems-systems/%s/analytics',    # (emsSystemId)
     search_f = '/v2/ems-systems/%s/flights/%s/analytics', # (emsSystemId, flightId)
     group    = '/v2/ems-systems/%s/analytic-groups',    # (emsSystemId)
-    group_f  = '/v2/ems-systems/R%s/flights/%s/analytic-groups', # (emsSystemId, flightId)
+    group_f  = '/v2/ems-systems/%s/flights/%s/analytic-groups', # (emsSystemId, flightId)
     query    = '/v2/ems-systems/%s/flights/%s/analytics/query', # (emsSystemId, flightId)
     metadata = '/v2/ems-systems/%s/flights/%s/analytics/metadata' # (emsSystemId, flightId)
   )
