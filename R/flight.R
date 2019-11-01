@@ -158,19 +158,6 @@ set_database.Flight <-
     flt
   }
 
-set_database_by_id.Flight <-
-  function(flt, db_id){
-    flt$db_id <- db_id
-    flt$trees$fieldtree <- get_fieldtree(flt)
-
-    if (nrow(flt$trees$fieldtree)) {
-      flt <- update_children(flt, get_database.Flight(flt), treetype= "fieldtree")
-    }
-
-    cat(sprintf("Using database '%s'.\n", get_database.Flight(flt)$name))
-    flt
-  }
-
 get_database.Flight <-
   function(flt)
   {
