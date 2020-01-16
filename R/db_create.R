@@ -22,10 +22,10 @@ insert_query <-
 insert_row.InsertQuery <-
   function(qry, row)
   {
-    #'
-    #' Inputs:
-    #'    row (list): A list of values to input, where the key is the fieldId and the value is the value to input.
-    #'        e.g. row <- list(fieldId1 = value1, fieldId2 = value2, ..., fieldIdN = valueN)
+    #
+    # Inputs:
+    #    row (list): A list of values to input, where the key is the fieldId and the value is the value to input.
+    #        e.g. row <- list(fieldId1 = value1, fieldId2 = value2, ..., fieldIdN = valueN)
     curr_length <- length(qry$create$createColumns) # Get length of createColumns field
     next_entry <- curr_length + 1 # Find next entry, which is where we want to put our next row
     qry$create$createColumns[[next_entry]] <- list() # Add an empty list at next_entry
@@ -43,10 +43,10 @@ insert_row.InsertQuery <-
 insert_data_frame.InsertQuery <-
   function(qry, df, schema_map=NULL)
   {
-    #'
-    #' Inputs:
-    #'    df (data.frame): A DataFrame of values to input, where the columns are the fieldIds and the entries are values to input.
-    #'    schema_map (list): A mapping of named dataframe columns to field ids, e.g. list('column1' = '[-hub][schema]')
+    #
+    # Inputs:
+    #    df (data.frame): A DataFrame of values to input, where the columns are the fieldIds and the entries are values to input.
+    #    schema_map (list): A mapping of named dataframe columns to field ids, e.g. list('column1' = '[-hub][schema]')
 
     # if schema_map is not null, we want to translate column names to fields in EMS, so we need to make sure all of the dataframe
     # columns are also in schema_map, which maps df column names to schemas in EMS
