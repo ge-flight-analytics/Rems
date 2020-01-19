@@ -72,7 +72,14 @@ qry <- update_dbtree(qry, "fdw", "events", "standard", "p0")
 qry <- set_database(qry, "p0: library flight safety events")
 ```
 
-These code lines first send queries to find the database-groups path, **FDW &rarr; APM Events &rarr; Standard Library Profiles &rarr; P0: Library Flight Safety Events**, and then select the "P0: Library Flight Safety Events" database that is located at the specified path. 
+These code lines first send queries to find the database-groups path, **FDW &rarr; APM Events &rarr; Standard Library Profiles &rarr; P0: Library Flight Safety Events**, and then select the "P0: Library Flight Safety Events" database that is located at the specified path.
+
+The `update_dbtree(...)` method can be passed a third optional parameter to prevent subtrees from being loaded. This can be useful when loading databases in a folder that contains a lot of subfolders. the optional parameter is `exclude_tree = ` and takes a vector/list as inut.
+
+```r
+# Load all the databases in the "FDW" folder, but not in the "APM Events", "APM Events (Archived)", and "Dimensions" subfolders
+qry <- update_dbtree(qry, "FDW", exclude_tree = c("APM Events", "APM Events (Archived)", "Dimensions") )
+```
 
 ### Data Fields
 Similar to the databases, the EMS data fields are organized in a tree structure so the steps are almost identical except that you use `update_fieldtree(...)` method in order to march through the tree branches.
@@ -94,7 +101,16 @@ qry <- update_fieldtree(qry, "profiles", "standard", "block-cost", "p301",
 ```
 The `update_fieldtree(...)` above queries the meta-data of all measurements located at the path, **Profiles &rarr; Standard Library Profiles &rarr; Block-Cost Model &rarr; P301: Block-Cost Model Planned Fuel Setup and Tests &rarr; Measured Items &rarr;Ground Operations (before takeoff)** in EMS Explorer.
 
-**Caution**: the process of adding a subtree usually requires a very large number of recursive RESTful API calls which take quite a long time. Please try to specify the subtree to as low level as possible to avoid a long processing time.
+**Caution**: the update_fieldtree method will add all subfolders of the leaf folder of the path unsless the exclude_tree = option is specified. The process of adding a subtree usually requires a very large number of recursive RESTful API calls which take quite a long time. Please try to specify the subtree to as low level as possible to avoid a long processing time.
+
+The `update_fieldtree(...)` method can be passed a third optional parameter to prevent subtrees from being loaded. This can be useful when loading fields in a folder that contains a lot of subfolders. the optional parameter is `exclude_tree = ` and takes a vector/list as inut.
+
+```r
+# Load all the fields in the "Flight Information" folder, but not in the
+# "Processing" and "Date Times" subfolders
+qry <- update_fieldtree(qry, "Flight Information", exclude_tree = c("Processing", "Date Times") )
+```
+
 
 As you may noticed in the example codes, you can specify a data entity by the string fraction of its full name. The "key words" of the entity name follows this rule:
 * Case insensitive
