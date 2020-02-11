@@ -103,7 +103,7 @@ run.InsertQuery <-
       content <- content(r)
       cat(sprintf('message: %s', content$message))
       cat(sprintf('messageDetail: %s', content$messageDetail))
-      cat(sprintf('messageDetail: %s', content$unexpected))
+      cat(sprintf('unexpected: %s', content$unexpected))
       return(FALSE)
     } else {
       cat(print("An unknown error occured."))
@@ -124,7 +124,7 @@ reset.InsertQuery <-
 
 
 #' @export
-json_str <-
+json_str.InsertQuery <-
   function(qry)
   {
     jsonlite::toJSON(qry$create, auto_unbox = T, pretty = T)
