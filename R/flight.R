@@ -3,7 +3,7 @@ exclude_dirs <- c('Download Information', 'Download Review', 'Processing',
                   'Profile 16 Extra Data', 'Flight Review', 'Data Information',
                   'Operational Information', 'Operational Information (ODW2)',
                   'Weather Information', 'Profiles', 'Profile')
-#'@export
+
 flight <-
   function(conn, ems_id, data_file = NULL)
   {
@@ -50,7 +50,6 @@ save_tree <-
     save_kvmaps(flt)
   }
 
-#'@export
 get_fieldtree <-
   function(flt)
   {
@@ -75,7 +74,6 @@ save_fieldtree <-
     }
   }
 
-#'@export
 get_dbtree <-
   function(flt)
   {
@@ -105,7 +103,6 @@ save_dbtree <-
     }
   }
 
-#'@export
 get_kvmaps <-
   function(flt)
   {
@@ -384,7 +381,6 @@ make_default_tree <-
     flt
   }
 
-#'@export
 search_fields <-
   function(flt, ..., unique = T)
   {
@@ -424,7 +420,6 @@ search_fields <-
     return(lapply(1:nrow(res), function(i) as.list(res[i,])))
   }
 
-#'@export
 list_allvalues <-
   function(flt, field = NULL, field_id = NULL, in_vec=FALSE, in_df=FALSE)
   {
@@ -477,7 +472,6 @@ list_allvalues <-
     return( kmap$value)
   }
 
-#'@export
 get_value_id <-
   function(flt, value, field=NULL, field_id=NULL)
   {
