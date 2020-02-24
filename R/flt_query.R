@@ -395,19 +395,19 @@ get_rwy_id <-
 
 #' @export
 update_dbtree <-
-  function(qry, ...)
+  function(qry, ..., exclude_tree=c())
   {
     path <- unlist(list(...))
-    qry$flight <- update_tree(qry$flight, path, treetype='dbtree')
+    qry$flight <- update_tree(qry$flight, path, treetype='dbtree', exclude_tree=exclude_tree)
     qry
   }
 
 #' @export
 update_fieldtree <-
-  function(qry, ...)
+  function(qry, ..., exclude_tree=c())
   {
     path <- unlist(list(...))
-    qry$flight <- update_tree(qry$flight, path, treetype='fieldtree')
+    qry$flight <- update_tree(qry$flight, path, treetype='fieldtree', exclude_tree=exclude_tree)
     return(qry)
   }
 
@@ -533,7 +533,7 @@ datetime_filter <-
     if ( op %in% names(date_ops) ) {
       t_op <- date_ops[[op]]
     } else {
-      stop(sprintf("%s: Unsupported conditional operator for date time fields.", op))
+      stop(sprintf("%s: Unsupported conditional operator for date time fields. Only < and >= are supported for date time fields.", op))
     }
     val_info <- c(val_info, list(list(type="constant", value="Utc")))
     fltr     <- filter_fmt(t_op, field_info, val_info)

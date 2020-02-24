@@ -150,7 +150,8 @@ set_database.Flight <-
     }
     flt$trees$fieldtree <- get_fieldtree(flt)
 
-    if (nrow(flt$trees$fieldtree)) {
+    # If the fieldtree is empty, populate it wuth the root folders for the selected DB
+    if (nrow(flt$trees$fieldtree) == 0) {
       flt <- update_children(flt, get_database.Flight(flt), treetype= "fieldtree")
     }
 

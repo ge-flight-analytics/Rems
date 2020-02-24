@@ -39,6 +39,11 @@ connect <-
       print(paste("Message:", content(r)$message))
     }
 
+    if ( http_error(r)) {
+      stop(paste("Message:", content(r)$error_description))
+    }
+
+
     c <- list(
       foqa      = list(usr=usr, pwd=pwd),
       proxies   = proxies,
