@@ -12,7 +12,6 @@ insert_query <-
 
     # object data
     obj$create <- list(createColumns=list())
-    obj$rows <- 0
     obj <- reset(obj)
 
     return(obj)
@@ -35,7 +34,6 @@ insert_row.InsertQuery <-
       qry$create$createColumns[[next_entry]][[i]] <- list(fieldId = field_id, value = row[[field_id]])
       i <- i + 1
     }
-    qry$rows <- qry$rows + 1
     qry
   }
 
@@ -55,6 +53,7 @@ insert_data_frame.InsertQuery <-
         if (!(col %in% names(schema_map))){
           cat(sprintf("Column: '%s' found in df, but not in mapper.  Please only pass in columns which should be updated in the target table and for which a
                       schema mapping exists in the supplied mapper list.", col))
+          stop("Not all columns in df were found in schema_map.")
         }
       }
     }
@@ -79,7 +78,6 @@ insert_data_frame.InsertQuery <-
       }
       i <- i + 1
     }
-    qry$rows <- qry$rows + 1
     qry
   }
 
@@ -94,7 +92,8 @@ run.InsertQuery <-
                  jsondata = qry$create)
     cat("Done.\n")
     if (status_code(r) == 200){
-      if (content(r)$rowsAdded == qry$rows){
+      n_rows <- length(qry$create$createColumns)
+      if (content(r)$rowsAdded == n_rows){
         cat(print('Successfully added all rows.'))
         return(TRUE)
       }
