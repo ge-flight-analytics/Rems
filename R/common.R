@@ -43,7 +43,8 @@ uris <- list(
     query = '/v2/ems-systems/%s/databases/%s/query',
     open_asyncq	= '/v2/ems-systems/%s/databases/%s/async-query', #(ems-system_id, database_id)
     get_asyncq = '/v2/ems-systems/%s/databases/%s/async-query/%s/read/%s/%s', #(ems-system_id, database_id, async_query_id, start_row, end_row)
-    close_asyncq = '/v2/ems-systems/%s/databases/%s/async-query/%s'
+    close_asyncq = '/v2/ems-systems/%s/databases/%s/async-query/%s',
+    create = '/v2/ems-systems/%s/databases/%s/create' # (emsSystemId, databaseId)
   ),
   analytic = list(
     search   = '/v2/ems-systems/%s/analytics',    # (emsSystemId)
