@@ -1,15 +1,37 @@
 
-#' Connect to EMS and get the Auth token
+#' Create EMS Connection Object
 #'
-#' @param usr String, FOQA username
-#' @param pwd String, FOQA password
-#' @param proxies List containing the system proxy information. The list contains attributes "url", "port", "usr", "pwd"
-#' @param server String, parameter that lets you choose an API server. See common.R for options.
-#' @return a Connection object.
-
+#' \code{connect} Creates a connection object to an EMS server for use in FltQuery objects.
+#'
+#' This function creates a connection object, including an authentication token.
+#' These can be passed into a \code{fltquery} or \code{tsquery} function to start the process of retrieving data.
+#' These functions take unmasked usernames and passwords - it is recommended that you either store your credentials
+#' securely, or wrap this function in something like \code{rstudioapi::askForPassword()} to avoid disclosing
+#' your credentials.
+#'
+#' @param usr A string, FOQA username (like firstname.lastname)
+#' @param pwd A string, FOQA password
+#' @param proxies A list containing the system proxy information, with attributes "url", "port", "usr", "pwd"
+#' @param server A string. Lets you choose an API server. Should be one of 'prod', 'cluster', 'stable', 'beta', 'nightly', or 'ctc'.
+#' @param server_url An optional string. If this is passed, it will be used instead of the internal server definitions matched by the 'server' argument.
+#' @return a Connection object to be used in FltQuery.
+#'
+#' @examples
+#' # connect in a standard way, using no proxy and connecting to prod by default.
+#' \dontrun{
+#' con <- connect("joe.bloggs", "mypassword")
+#' qry <- flt_query(conn = con, ems_name = "my-ems", data_file = "file.db")
+#' }
+#'# connect using the beta build, and a proxy
+#'\dontrun{
+#'con <- connect("joe.bloggs", "mypassword",
+#'               proxies = list(url = "http://myproxy.com", port = 8080, usr = "joebloggs", pwd = "mypassword"),
+#'               server = 'beta')
+#'}
+#'
 #' @export
 connect <-
-  function(usr, pwd, proxies = NULL, server = 'prod', server_url = NULL)
+  function(usr, pwd, proxies = NULL, server = c('prod', 'cluster', 'stable', 'beta', 'nightly', 'ctc'), server_url = NULL)
   {
     # Prevent from the Peer certificate error ("Error in curl::curl_fetch_memory(url, handle = handle) :
     # Peer certificate cannot be authenticated with given CA certificates")
@@ -19,6 +41,8 @@ connect <-
     body <- list(grant_type = "password",
                 username   = usr,
                 password   = pwd)
+
+    server <- match.arg(server, c('prod', 'cluster', 'stable', 'beta', 'nightly', 'ctc'), several.ok = FALSE)
 
     sel_uri_root <- if (is.null(server_url)) uri_root[[server]] else server_url
     uri = paste(sel_uri_root, uris$sys$auth, sep="")
