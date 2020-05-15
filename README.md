@@ -46,6 +46,18 @@ With optional `server` argument, you can select one of the currently available E
 * "beta" (beta test version)
 * "nightly" (nightly upgraded test version)
 * "ctc" (Shanghai production version)
+
+For servers hosted locally or in Azure, the server_url argument should be used instead of the server argument. This argument should be of the format "<server address>/api". For example, if the server hosting the API is http://abc-api.us.efoqa.com, the connection object would look like this
+
+```r
+conn <- connect({efoqa_usr},
+                {efoqa_pwd},
+                proxies = list(url  = {proxy_address},
+                               port = {port},
+                               usr  = {proxy_usr},
+                               pwd  = {proxy_pwd}),
+                server_url = "http://abc-api.us.efoqa.com/api")
+```
 ## Flight Querying
 
 ### Instantiate Query
