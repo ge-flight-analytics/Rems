@@ -25,7 +25,8 @@
 #'# connect using the beta build, and a proxy
 #'\dontrun{
 #'con <- connect("joe.bloggs", "mypassword",
-#'               proxies = list(url = "http://myproxy.com", port = 8080, usr = "joebloggs", pwd = "mypassword"),
+#'               proxies = list(url = "http://myproxy.com", port = 8080,
+#'               usr = "joebloggs", pwd = "mypassword"),
 #'               server = 'beta')
 #'}
 #'
@@ -152,7 +153,7 @@ request <-
 
     if (!is.null(uri_args)) {
       # percent encode the args
-      uri_args <- sapply(uri_args, function(x) if (is.na(suppressWarnings(as.numeric(x)))) URLencode(x, reserved = T) else x)
+      uri_args <- sapply(uri_args, function(x) if (is.na(suppressWarnings(as.numeric(x)))) URLencode(x, reserved = TRUE) else x)
       uri      <- do.call(sprintf, as.list(c(uri, uri_args)))
     }
 
