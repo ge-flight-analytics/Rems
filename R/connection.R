@@ -78,6 +78,22 @@ connect <-
     c
   }
 
+#' Refresh Connection
+#'
+#' Refresh the connection object in case auth token expires.
+#'
+#' This function will re-use the stored connection credentials in the connection object to regenerate the authentication token.
+#'
+#' @param conn A connection object created by the \code{connect} function.
+#' @return A refreshed connection object like the one returned by \code{connect}
+#'
+#' @examples
+#' \dontrun{
+#' con <- connect("joe.bloggs", "mypassword")
+#' sys.Sleep(3600)
+#' con <- reconnect(con)
+#' }
+#'
 #' @export
 reconnect <-
   function(conn)
