@@ -30,8 +30,7 @@
 #'}
 #'
 #' @export
-connect <-
-  function(usr, pwd, proxies = NULL, server = c('prod', 'cluster', 'stable', 'beta', 'nightly', 'ctc'), server_url = NULL)
+connect <- function(usr, pwd, proxies = NULL, server = c('prod', 'cluster', 'stable', 'beta', 'nightly', 'ctc'), server_url = NULL)
   {
     # Prevent from the Peer certificate error ("Error in curl::curl_fetch_memory(url, handle = handle) :
     # Peer certificate cannot be authenticated with given CA certificates")
