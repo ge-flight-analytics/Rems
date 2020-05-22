@@ -45,7 +45,8 @@ qry <- flt_query(conn = con, ems_name = "my-ems", data_file = "file.db")
 # connect using the beta build, and a proxy
 \dontrun{
 con <- connect("joe.bloggs", "mypassword",
-              proxies = list(url = "http://myproxy.com", port = 8080, usr = "joebloggs", pwd = "mypassword"),
+              proxies = list(url = "http://myproxy.com", port = 8080,
+              usr = "joebloggs", pwd = "mypassword"),
               server = 'beta')
 }
 
