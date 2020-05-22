@@ -2,23 +2,52 @@
 % Please edit documentation in R/connection.R
 \name{connect}
 \alias{connect}
-\title{Connect to EMS and get the Auth token}
+\title{Create EMS Connection Object}
 \usage{
-connect(usr, pwd, proxies = NULL, server = "prod", server_url = NULL)
+connect(
+  usr,
+  pwd,
+  proxies = NULL,
+  server = c("prod", "cluster", "stable", "beta", "nightly", "ctc"),
+  server_url = NULL
+)
 }
 \arguments{
-\item{usr}{String, FOQA username}
+\item{usr}{A string, FOQA username (like firstname.lastname)}
 
-\item{pwd}{String, FOQA password}
+\item{pwd}{A string, FOQA password}
 
-\item{proxies}{List containing the system proxy information. The list contains attributes "url", "port", "usr", "pwd"}
+\item{proxies}{A list containing the system proxy information, with attributes "url", "port", "usr", "pwd"}
 
-\item{server}{String, temporary parameter that let you choose an API server. Currently "old" (2-node), "new" (3-node now but eventually grow to 24 nodes)}
+\item{server}{A string. Lets you choose an API server. Should be one of 'prod', 'cluster', 'stable', 'beta', 'nightly', or 'ctc'.}
+
+\item{server_url}{An optional string. If this is passed, it will be used instead of the internal server definitions matched by the 'server' argument.}
 }
 \value{
-a Connection object.
+a Connection object to be used in FltQuery.
 }
 \description{
-Connect to EMS and get the Auth token
+\code{connect} Creates a connection object to an EMS server for use in FltQuery objects.
+}
+\details{
+This function creates a connection object, including an authentication token.
+These can be passed into a \code{fltquery} or \code{tsquery} function to start the process of retrieving data.
+These functions take unmasked usernames and passwords - it is recommended that you either store your credentials
+securely, or wrap this function in something like \code{rstudioapi::askForPassword()} to avoid disclosing
+your credentials.
+}
+\examples{
+# connect in a standard way, using no proxy and connecting to prod by default.
+\dontrun{
+con <- connect("joe.bloggs", "mypassword")
+qry <- flt_query(conn = con, ems_name = "my-ems", data_file = "file.db")
+}
+# connect using the beta build, and a proxy
+\dontrun{
+con <- connect("joe.bloggs", "mypassword",
+              proxies = list(url = "http://myproxy.com", port = 8080,
+              usr = "joebloggs", pwd = "mypassword"),
+              server = 'beta')
 }
 
+}
