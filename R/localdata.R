@@ -20,7 +20,7 @@ localdata <-
 connect.LocalData <-
   function(ldat)
   {
-    ldat$conn <- dbConnect(SQLite(), dbname = ldat$dbfile)
+    ldat$conn <- DBI::dbConnect(RSQLite::SQLite(), dbname = ldat$dbfile)
     ldat
   }
 
@@ -37,7 +37,7 @@ check_colnames <-
 close.LocalData <-
   function(ldat)
   {
-    dbDisconnect(ldat$conn)
+    DBI::dbDisconnect(ldat$conn)
   }
 
 
@@ -45,18 +45,18 @@ append_data <-
   function(ldat, table_name, dat)
   {
     check_colnames(ldat, table_name, dat)
-    dbWriteTable(ldat$conn, table_name, dat, append = T, row.names = F)
+    DBI::dbWriteTable(ldat$conn, table_name, dat, append = T, row.names = F)
   }
 
 get_data <-
   function(ldat, table_name, condition = NULL)
   {
-    if (dbExistsTable(ldat$conn, table_name)) {
+    if (DBI::dbExistsTable(ldat$conn, table_name)) {
       q <- paste("SELECT * FROM", table_name)
       if (!is.null(condition)) {
         q <- paste(q, "WHERE", condition)
       }
-      dat <- dbGetQuery(ldat$conn, q)
+      dat <- DBI::dbGetQuery(ldat$conn, q)
       return (dat)
     }
     dat <- data.frame(matrix(NA,nrow=0, ncol=length(ldat$table_info[[table_name]])), stringsAsFactors = F)
@@ -68,11 +68,11 @@ get_data <-
 delete_data <-
   function(ldat, table_name, condition = NULL)
   {
-    if (dbExistsTable(ldat$conn, table_name)) {
+    if (DBI::dbExistsTable(ldat$conn, table_name)) {
       if (is.null(condition)) {
-        dbExecute(ldat$conn, paste("DROP TABLE", table_name))
+        DBI::dbExecute(ldat$conn, paste("DROP TABLE", table_name))
       } else {
-        dbExecute(ldat$conn, paste("DELETE FROM", table_name, "WHERE", condition))
+        DBI::dbExecute(ldat$conn, paste("DELETE FROM", table_name, "WHERE", condition))
       }
     }
   }

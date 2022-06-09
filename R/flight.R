@@ -1,4 +1,6 @@
 
+utils::globalVariables(c("id", "ems_id", "nodetype", "parent_id"))
+
 exclude_dirs <- c('Download Information', 'Download Review', 'Processing',
                   'Profile 16 Extra Data', 'Flight Review', 'Data Information',
                   'Operational Information', 'Operational Information (ODW2)',
@@ -176,7 +178,7 @@ db_request <-
                     uri_args = flt$ems_id,
                     body = body)
     ##  Get the children fields/field groups
-    d <- content(r)
+    d <- httr::content(r)
 
     d1 <- list()
     if (length(d$databases) > 0) {
@@ -210,7 +212,7 @@ fl_request <-
                     uri_args = c(flt$ems_id, flt$db_id),
                     body = body)
     ##  Get the children fields/field groups
-    d <- content(r)
+    d <- httr::content(r)
 
     d1 <- list()
     if (length(d$fields) > 0) {
@@ -453,7 +455,7 @@ list_allvalues <-
       r <- request(flt$connection,
                    uri_keys = c('database', 'field'),
                    uri_args = c(flt$ems_id, flt$db_id, fld_id))
-      km <- content(r)$discreteValues
+      km <- httr::content(r)$discreteValues
       kmap <- data.frame(ems_id=flt$ems_id,
                          id    =fld_id,
                          key   =as.integer(names(km)),

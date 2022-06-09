@@ -32,10 +32,10 @@ simple_run.FltQuery <-
                  jsondata = qry$queryset)
     cat("Done.\n")
     if ( output == "raw" ) {
-      return(content(r))
+      return(httr::content(r))
     }
     else if ( output == "dataframe" ) {
-      return(to_dataframe(qry, content(r)))
+      return(to_dataframe(qry, httr::content(r)))
     }
   }
 
@@ -52,13 +52,13 @@ async_run.FltQuery <-
                    uri_keys = c('database', 'open_asyncq'),
                    uri_args = c(qry$ems_id, qry$flight$db_id),
                    jsondata = qry$queryset)
-      if (is.null(content(r)$id)) {
-        print(headers(r))
-        print(content(r))
+      if (is.null(httr::content(r)$id)) {
+        print(httr::headers(r))
+        print(httr::content(r))
         stop("Opening Async query did not return the query Id.")
       }
       cat('Done.\n')
-      content(r)
+      httr::content(r)
     }
 
     # Open async-query
@@ -80,19 +80,18 @@ async_run.FltQuery <-
                                     async_q$id,
                                     formatC(n_row*(ctr-1), format="d"),
                                     formatC(n_row*ctr-1, format="d")))
-          if (is.null(content(r)$rows)) {
+          if (is.null(httr::content(r)$rows)) {
             # Reopen the query if not returning data
             async_q <- open_async_query()
           } else {
             break
           }
         }
-        resp <- content(r)
+        resp <- httr::content(r)
         resp$header <- async_q$header
       }, error = function(e) {
         cat("Something's wrong. Returning what has been sent so far.\n")
-        print(headers(r))
-        # print(content(r))
+        print(httr::headers(r))
         break
       })
       if (length(resp$rows) < 1) {

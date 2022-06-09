@@ -85,34 +85,6 @@ timepoint <-
     return(qry)
   }
 
-# flight_duration <-
-#   function(qry, flight, unit = "second")
-#   {
-#     prm <- get_param(qry$analytic, "hours of data (hours)")
-#     q <- list(select = list(analyticId = prm$id),
-#               size = 1)
-#     r <- request(qry$connection, rtype="POST",
-#                  uri_keys = c("analytic", "query"),
-#                  uri_args = c(qry$ems_id, flight),
-#                  jsondata = q)
-#     res <- content(r)
-#     if ( !is.null(res$message) ) {
-#       stop(sprintf('API query for flight = %s, parameter = "%s" was unsuccessful.\nHere is the massage from API: %s',
-#                    flight, prm$name, res$message))
-#     }
-#     fl_len <- res$results[[1]][['values']][[1]]
-#
-#     if (unit=="second") {
-#       y <- fl_len * 60 * 60
-#     } else if (unit=="minute") {
-#       y <- fl_len * 60
-#     } else if (unit=="hour") {
-#       y <- fl_len
-#     } else {
-#       stop(sprintf('Unrecognizable time unit (%s).', unit))
-#     }
-#     return(y)
-#   }
 
 #' @export
 run.TsQuery <-
@@ -134,7 +106,7 @@ run.TsQuery <-
                  uri_keys = c("analytic", "query"),
                  uri_args = c(qry$ems_id, flight),
                  jsondata = qry$queryset)
-    res <- content(r)
+    res <- httr::content(r)
     if ( !is.null(res$message) ) {
       stop(sprintf('API query for flight = %s was unsuccessful.\nHere is the massage from API: %s',
                    flight, res$message))
@@ -164,7 +136,7 @@ run_multiflts <-
     res <- list()
 
     attr_flag <- F
-    if ( class(flight) == "data.frame" ) {
+    if ( methods::is(flight, "data.frame") ) {
       FR <- flight[ , "Flight Record"]
       attr_flag <- T
     } else {

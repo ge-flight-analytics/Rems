@@ -91,15 +91,15 @@ run.InsertQuery <-
                  uri_args = c(qry$ems_id, qry$db_id),
                  jsondata = qry$create)
     cat("Done.\n")
-    if (status_code(r) == 200){
+    if (httr::status_code(r) == 200){
       n_rows <- length(qry$create$createColumns)
-      if (content(r)$rowsAdded == n_rows){
+      if (httr::content(r)$rowsAdded == n_rows){
         cat(print('Successfully added all rows.'))
         return(TRUE)
       }
-    } else if (status_code(r) %in% c(400, 401, 503)) {
+    } else if (httr::status_code(r) %in% c(400, 401, 503)) {
       cat(print('Failed to add rows.'))
-      content <- content(r)
+      content <- httr::content(r)
       cat(sprintf('message: %s', content$message))
       cat(sprintf('messageDetail: %s', content$messageDetail))
       cat(sprintf('unexpected: %s', content$unexpected))

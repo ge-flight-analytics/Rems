@@ -1,3 +1,6 @@
+
+utils::globalVariables(c("name", "file_name"))
+
 analytic <-
   function(conn, ems_id, data_file = NULL)
   {
@@ -48,7 +51,7 @@ search_param <-
                  uri_args = anal$ems_id,
                  body = list(text = keyword))
     # Param set JSON to R list
-    prm <- content(r)
+    prm <- httr::content(r)
     if ( length(prm)==0 ) {
       stop(sprintf("No parameter found with search keyword %s.", keyword))
     } else {
