@@ -56,23 +56,16 @@ uris <- list(
   )
 )
 
-#' @export
-set_database <- function(qry, ...) UseMethod("set_database", qry)
+basic_ops <- list(
+  "==" = 'equal', "!=" = 'notEqual', "<" = 'lessThan',
+  "<=" = 'lessThanOrEqual', ">" = 'greaterThan', ">=" = 'greaterThanOrEqual'
+)
 
-#' @export
-get_database <- function(qry, ...) UseMethod("get_database", qry)
+sp_ops <- list(
+  ' in '= 'in',
+  ' not in '= 'notIn'
+)
 
-#' @export
-reset <- function(qry, ...) UseMethod("reset", qry)
 
-#' @export
-select <- function(qry, ...) UseMethod("select", qry)
 
-#' @export
-run <- function(qry, ...) UseMethod("run", qry)
 
-#' @export
-simple_run <- function(qry, ...) UseMethod("simple_run", qry)
-
-#' @export
-async_run <- function(qry, ...) UseMethod("async_run", qry)
