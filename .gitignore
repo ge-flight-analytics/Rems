@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+temp/
+timeseries.db

@@ -39,14 +39,12 @@ select.TsQuery <-
       # Get the param from the param table
       prm <- get_param(qry$analytic, kw)
       if ( prm$id=="" ) {
+
         # If param's not found, search from EMS API
         res <- search_param(qry$analytic, kw)
-        # Stack them into the param_table to reuse them
-        df <- data.frame(matrix(NA, nrow = length(res), ncol = length(res[[1]])), stringsAsFactors = F)
-        names(df) <- names(res[[1]])
-        for (i in seq_along(res)) {
-          df[i, ] <- res[[i]]
-        }
+
+        df <- dplyr::bind_rows( res )
+
         qry$analytic$param_table <- rbind(qry$analytic$param_table, df)
         prm <- res[[1]]
         save_table <- T

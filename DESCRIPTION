@@ -15,3 +15,5 @@ Depends:
     jsonlite (>= 0.9.21)
 RoxygenNote: 7.1.0
 Encoding: UTF-8
+Imports: 
+    dplyr
