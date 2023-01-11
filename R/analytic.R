@@ -38,6 +38,40 @@ save_paramtable <-
     }
   }
 
+#' Search Global Parameters
+#' 
+#' Search for global parameters matching a substring.
+#' 
+#' This function uses the analytic element of a time series query
+#' to search for global parameters matching a substring. It will return
+#' a list containing all the parameters that match the substring, as well
+#' as their EMS GUIDs, names, descriptions, and units.
+#' 
+#' @export
+#' @param anal An analytic object (an element of list returned by tseries_query)
+#' @param keyword A character string to search for in the parameter names.
+#' 
+#' @return A list of parameters lists (list of lists) with the following fields:
+#' \itemize{
+#' \item id: EMS GUID of the parameter
+#' \item name: Name of the parameter
+#' \item description: Description of the parameter
+#' \item units: the units of the parameter, if available
+#' \item metadata: any associated metadata text, if available
+#' \item ems_id: EMS ID of the analytic
+#' }
+#' @examples
+#' \dontrun{
+#' # Connect to EMS
+#' conn <- connect("http://localhost:8080")
+#' # Get a time series query object
+#' qry <- tseries_query(conn, 1)
+#' # Search for parameters with keyword "weather"
+#' prm <- search_param(qry$analytic, "weather")
+#' }
+#' 
+#' 
+
 search_param <-
   function(anal, keyword)
   {
