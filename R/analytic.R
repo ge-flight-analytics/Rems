@@ -39,18 +39,22 @@ save_paramtable <-
   }
 
 #' Search Global Parameters
-#' 
+#'
 #' Search for global parameters matching a substring.
-#' 
+#'
 #' This function uses the analytic element of a time series query
 #' to search for global parameters matching a substring. It will return
 #' a list containing all the parameters that match the substring, as well
 #' as their EMS GUIDs, names, descriptions, and units.
-#' 
+#'
 #' @export
 #' @param anal An analytic object (an element of list returned by tseries_query)
 #' @param keyword A character string to search for in the parameter names.
-#' 
+#' @param category Kind of parameter to search. Defaults to 'full' (all available.)
+#' @param flight_record Optional flight record to restrict search to.
+#' @param group A group ID to restrict the search to. Defaults to all group IDs.
+#' @param max_results Defaults to 200 - if set to 0, it will return all results.
+#'
 #' @return A list of parameters lists (list of lists) with the following fields:
 #' \itemize{
 #' \item id: EMS GUID of the parameter
@@ -69,18 +73,48 @@ save_paramtable <-
 #' # Search for parameters with keyword "weather"
 #' prm <- search_param(qry$analytic, "weather")
 #' }
-#' 
-#' 
+#'
+#'
 
 search_param <-
-  function(anal, keyword)
+  function(anal,
+           keyword,
+           category = c("full" , "physical", "logical"),
+           flight_record = NULL,
+           group = NULL,
+           max_results = NULL
+)
   {
+    category <- match.arg(category, c("full" , "physical", "logical"))
+
+    if (category == "Physical" & is.null(flight_record)) {
+      stop("Physical Parameter searches must specify a flight record.")
+    }
+
+    if (!is.null(max_results)) {
+      if (max_results < 0) stop("max_results must be a number > 0.")
+      if (max_results == 0) warning("Setting max_results to 0 returns all results.")
+    }
+
+    if (!is.null(flight_record)) {
+      if (!is.numeric(flight_record)) stop("Flight record must be a number.")
+    }
+
+    if (!is.null(flight_record)) {
+      search_type_key <- "search_f"
+    } else {
+      search_type_key <- "search"
+    }
+
     cat(sprintf('Searching for params with keyword "%s" from EMS ...', keyword))
     # EMS API Call
     r <- request(anal$connection,
-                 uri_keys = c('analytic','search'),
-                 uri_args = anal$ems_id,
-                 body = list(text = keyword))
+                 uri_keys = c('analytic',search_type_key),
+                 uri_args = c(anal$ems_id, flight_record),
+                 body = list(text = keyword,
+                             group = group,
+                             maxResults = max_results,
+                             category = category))
     # Param set JSON to R list
     prm <- content(r)
     if ( length(prm)==0 ) {
