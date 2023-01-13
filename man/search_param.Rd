@@ -4,12 +4,27 @@
 \alias{search_param}
 \title{Search Global Parameters}
 \usage{
-search_param(anal, keyword)
+search_param(
+  anal,
+  keyword,
+  category = c("full", "physical", "logical"),
+  flight_record = NULL,
+  group = NULL,
+  max_results = NULL
+)
 }
 \arguments{
 \item{anal}{An analytic object (an element of list returned by tseries_query)}
 
 \item{keyword}{A character string to search for in the parameter names.}
+
+\item{category}{Kind of parameter to search. Defaults to 'full' (all available.)}
+
+\item{flight_record}{Optional flight record to restrict search to.}
+
+\item{group}{A group ID to restrict the search to. Defaults to all group IDs.}
+
+\item{max_results}{Defaults to 200 - if set to 0, it will return all results.}
 }
 \value{
 A list of parameters lists (list of lists) with the following fields:
