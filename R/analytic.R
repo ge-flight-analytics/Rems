@@ -87,7 +87,7 @@ search_param <-
   {
     category <- match.arg(category, c("full" , "physical", "logical"))
 
-    if (category == "Physical" & is.null(flight_record)) {
+    if (category == "physical" & is.null(flight_record)) {
       stop("Physical Parameter searches must specify a flight record.")
     }
 
