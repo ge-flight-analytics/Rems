@@ -1,6 +1,20 @@
+#' Time Series Query
+#'
+#' Instantiate a time series query object
+#'
+#' This function creates a time series query object that can be used to query
+#' time series (i.e. parameter level) data from EMS. If you need physical
+#' parameter data, you will need to set a specific flight record to search
+#' to return those parameters.
+#'
+#' @param conn A connect object created by the connect function.
+#' @param ems_name A string, the name of the EMS instance being connected to.
+#' @param data_file A string, the name of the db file to store metadata to.
+#' @param flight_record_searched optional numeric flight record to search params
+#'
 #' @export
 tseries_query <-
-  function(conn, ems_name, data_file = NULL)
+  function(conn, ems_name, data_file = NULL, flight_record_searched = NULL)
   {
     obj <- list()
     class(obj) <- 'TsQuery'
@@ -10,6 +24,7 @@ tseries_query <-
     obj$ems        <- ems(conn)
     obj$ems_id     <- get_id(obj$ems, ems_name)
     obj$analytic   <- analytic(conn, obj$ems_id, data_file)
+    obj$fr         <- flight_record_searched
 
     # object data
     obj$queryset <- list()
@@ -41,7 +56,7 @@ select.TsQuery <-
       if ( prm$id=="" ) {
 
         # If param's not found, search from EMS API
-        res <- search_param(qry$analytic, kw)
+        res <- search_param(qry$analytic, kw, flight_record = qry$fr)
 
         df <- dplyr::bind_rows( res )
 
