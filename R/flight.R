@@ -471,7 +471,7 @@ list_allvalues <-
     }
     return( kmap$value)
   }
-
+#' @importFrom stringdist stringdist
 get_value_id <-
   function(flt, value, field=NULL, field_id=NULL)
   {
@@ -479,7 +479,14 @@ get_value_id <-
     key   <- kvmap[kvmap$value==value, 'key']
 
     if ( length(key)==0 ) {
-      stop(sprintf("%s could not be found from the list of the field values.", value))
+      distances <- stringdist::stringdist(kvmap$value, value, method = "osa")
+      top_3_distance <- head(sort(distances), 3)
+      top_3_closest <- kvmap$value[which(distances %in% top_3_distance)]
+      top_3_closest_collapsed <- paste(top_3_closest, collapse = ",  ")
+      stop(sprintf("%s could not be found from the list of the field values.\nPerhaps you meant one of the following: %s",
+                   value,
+                   top_3_closest_collapsed)
+           )
     }
     return(as.integer(key))
   }
