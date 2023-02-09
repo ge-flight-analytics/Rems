@@ -129,8 +129,36 @@ timepoint <-
 
 #' @export
 run.TsQuery <-
-  function(qry, flight, start = NULL, end = NULL, timestep = NULL, timepoint = NULL)
+  function(qry,
+           flight,
+           start = NULL,
+           end = NULL,
+           timestep = NULL,
+           timepoint = NULL,
+           sample_mode = c("leaveBlank", "uniquePreviousSample",
+                           "stairStep", "linearInterpolation",
+                           "parameterDefault", "previousSample"),
+           offset_type = c("sampledValues", "fixedRate"),
+           samplingRate = NULL
+  )
+
   {
+
+    sample_mode <- match.arg(sample_mode,
+                             c("leaveBlank", "uniquePreviousSample",
+                               "stairStep", "linearInterpolation",
+                               "parameterDefault", "previousSample")
+    )
+
+    offset_type <- match.arg(offset_type, c("sampledValues", "fixedRate"))
+
+    qry$queryset[["unsampledDataMode"]] <- sample_mode
+
+    if (offset_type == "fixedRate" & !is.null(samplingRate)) {
+      qry$queryset$offsetType[["type"]] <- offset_type
+      qry$queryset$offsetType[["samplingRate"]] <- samplingRate
+    }
+
     if (!is.null(timepoint)) {
       qry <- timepoint(qry, timepoint)
     } else if (!is.null(timestep)) {
