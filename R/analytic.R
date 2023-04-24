@@ -74,7 +74,7 @@ save_paramtable <-
 #' prm <- search_param(qry$analytic, "weather")
 #' }
 #'
-#'
+#' @import httr
 
 search_param <-
   function(anal,

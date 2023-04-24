@@ -56,5 +56,4 @@ qry <- tseries_query(conn, 1)
 prm <- search_param(qry$analytic, "weather")
 }
 
-
 }
