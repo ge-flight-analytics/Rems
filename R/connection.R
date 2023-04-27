@@ -48,23 +48,23 @@ connect <- function(usr, pwd, proxies = NULL, server = c('prod', 'cluster', 'sta
     uri = paste(sel_uri_root, uris$sys$auth, sep="")
 
     if (is.null(proxies)) {
-      r <- POST(uri,
-               add_headers(.headers = header),
+      r <- httr::POST(uri,
+               httr::add_headers(.headers = header),
                body = body,
                encode = "form")
     } else {
-      r <- POST(uri,
+      r <- httr::POST(uri,
                use_proxy(proxies$url, port = proxies$port, username = proxies$usr, password = proxies$pwd),
-               add_headers(.headers = header),
+               httr::add_headers(.headers = header),
                body = body,
                encode = "form")
     }
-    if ( !is.null(content(r)$message) ) {
-      print(paste("Message:", content(r)$message))
+    if ( !is.null(httr::content(r)$message) ) {
+      print(paste("Message:", httr::content(r)$message))
     }
 
     if ( http_error(r)) {
-      stop(paste("Message:", content(r)$error_description))
+      stop(paste("Message:", httr::content(r)$error_description))
     }
 
 
@@ -72,8 +72,8 @@ connect <- function(usr, pwd, proxies = NULL, server = c('prod', 'cluster', 'sta
       foqa      = list(usr=usr, pwd=pwd),
       proxies   = proxies,
       uri_root  = sel_uri_root,
-      token     = content(r)$access_token,
-      token_type= content(r)$token_type
+      token     = httr::content(r)$access_token,
+      token_type= httr::content(r)$token_type
     )
     c
   }
@@ -166,37 +166,37 @@ request <-
 
     if (rtype=="GET") {
       tryCatch({
-        r <- GET(uri, prxy, query = body, add_headers(.headers = headers), encode = encoding)
+        r <- httr::GET(uri, prxy, query = body, httr::add_headers(.headers = headers), encode = encoding)
       }, error = function(err) {
         print(err)
-        cat(sprintf("Http status code %s: %s", status_code(r), content(r)))
+        cat(sprintf("Http status code %s: %s", httr::status_code(r), httr::content(r)))
         cat("Trying to Reconnect EMS...")
         conn = reconnect(conn)
-        r <- GET(uri, prxy, query = body, add_headers(.headers = headers), encode = encoding)
+        r <- httr::GET(uri, prxy, query = body, httr::add_headers(.headers = headers), encode = encoding)
       }
 
       )
 
     } else if (rtype=="POST") {
       tryCatch({
-        r <- POST(uri, prxy, body = body, add_headers(.headers = headers), encode = encoding)
+        r <- httr::POST(uri, prxy, body = body, httr::add_headers(.headers = headers), encode = encoding)
       }, error = function(err) {
         print(err)
-        cat(sprintf("Http status code %s: %s", status_code(r), content(r)))
+        cat(sprintf("Http status code %s: %s", httr::status_code(r), httr::content(r)))
         cat("Trying to Reconnect EMS...\n")
         conn = reconnect(conn)
-        r <- POST(uri, prxy, body = body, add_headers(.headers = headers), encode = encoding)
+        r <- httr::POST(uri, prxy, body = body, httr::add_headers(.headers = headers), encode = encoding)
       })
 
     } else if (rtype=="DELETE") {
       tryCatch({
-        r <- DELETE(uri, prxy, body = body, add_headers(.headers = headers), encode = encoding)
+        r <- DELETE(uri, prxy, body = body, httr::add_headers(.headers = headers), encode = encoding)
       }, error = function(err) {
         print(err)
-        cat(sprintf("Http status code %s: %s", status_code(r), content(r)))
+        cat(sprintf("Http status code %s: %s", httr::status_code(r), httr::content(r)))
         cat("Trying to Reconnect EMS...\n")
         conn = reconnect(conn)
-        r <- DELETE(uri, prxy, body = body, add_headers(.headers = headers), encode = encoding)
+        r <- DELETE(uri, prxy, body = body, httr::add_headers(.headers = headers), encode = encoding)
       })
     } else {
       stop(sprintf("%s: Unsupported request type.", rtype))

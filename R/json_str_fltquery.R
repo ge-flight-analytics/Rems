@@ -1,4 +1,5 @@
 #' @export
+#' @importFrom jsonlite toJSON
 json_str <- function(qry, ...) UseMethod("json_str", qry)
 
 #' @export

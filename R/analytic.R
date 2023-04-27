@@ -74,7 +74,7 @@ save_paramtable <-
 #' prm <- search_param(qry$analytic, "weather")
 #' }
 #'
-#'
+#' @import httr
 
 search_param <-
   function(anal,
@@ -116,7 +116,7 @@ search_param <-
                              maxResults = max_results,
                              category = category))
     # Param set JSON to R list
-    prm <- content(r)
+    prm <- httr::content(r)
     if ( length(prm)==0 ) {
       stop(sprintf("No parameter found with search keyword %s.", keyword))
     } else {
