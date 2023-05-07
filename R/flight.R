@@ -176,7 +176,7 @@ db_request <-
                     uri_args = flt$ems_id,
                     body = body)
     ##  Get the children fields/field groups
-    d <- content(r)
+    d <- httr::content(r)
 
     d1 <- list()
     if (length(d$databases) > 0) {
@@ -210,7 +210,7 @@ fl_request <-
                     uri_args = c(flt$ems_id, flt$db_id),
                     body = body)
     ##  Get the children fields/field groups
-    d <- content(r)
+    d <- httr::content(r)
 
     d1 <- list()
     if (length(d$fields) > 0) {
@@ -453,7 +453,7 @@ list_allvalues <-
       r <- request(flt$connection,
                    uri_keys = c('database', 'field'),
                    uri_args = c(flt$ems_id, flt$db_id, fld_id))
-      km <- content(r)$discreteValues
+      km <- httr::content(r)$discreteValues
       kmap <- data.frame(ems_id=flt$ems_id,
                          id    =fld_id,
                          key   =as.integer(names(km)),
@@ -471,7 +471,7 @@ list_allvalues <-
     }
     return( kmap$value)
   }
-
+#' @importFrom stringdist stringdist
 get_value_id <-
   function(flt, value, field=NULL, field_id=NULL)
   {
@@ -479,7 +479,14 @@ get_value_id <-
     key   <- kvmap[kvmap$value==value, 'key']
 
     if ( length(key)==0 ) {
-      stop(sprintf("%s could not be found from the list of the field values.", value))
+      distances <- stringdist::stringdist(kvmap$value, value, method = "osa")
+      top_3_distance <- head(sort(distances), 3)
+      top_3_closest <- kvmap$value[which(distances %in% top_3_distance)]
+      top_3_closest_collapsed <- paste(top_3_closest, collapse = ",  ")
+      stop(sprintf("%s could not be found from the list of the field values.\nPerhaps you meant one of the following: %s",
+                   value,
+                   top_3_closest_collapsed)
+           )
     }
     return(as.integer(key))
   }

@@ -9,7 +9,7 @@ ems <- function(conn) {
 update_list <- function(obj) {
   conn <- obj$connection
   r <- request(conn, uri_keys = c('ems_sys', 'list'))
-  d <- content(r)
+  d <- httr::content(r)
   df <- data.frame(id = character(0), name = character(0), stringsAsFactors = FALSE)
   for ( i in 1:length(d) ) {
     df[i, ] <- unlist(d[[i]][c('id','name')])
