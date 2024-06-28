@@ -59,7 +59,10 @@ select.TsQuery <-
         # If param's not found, search from EMS API
         res <- search_param(qry$analytic, kw, flight_record = qry$fr)
 
+        #Drop both the 'Path' and 'displayPath' as they are list elements.
+        #I don't believe they get used down stream so easier to drop.
         df <- dplyr::bind_rows( res )
+        df <- dplyr::select( df, -path, -displayPath )
 
         qry$analytic$param_table <- rbind(qry$analytic$param_table, df)
         prm <- res[[1]]
