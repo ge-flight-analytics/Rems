@@ -61,6 +61,15 @@ select.TsQuery <-
 
         df <- dplyr::bind_rows( res )
 
+        #Drop both the 'Path' and 'displayPath' as they are list elements.
+        #I don't believe they get used down-stream so easier to drop.
+        if( "path" %in% names( df ) ){
+          df <- dplyr::select( df, -path)
+        }
+        if( "displayPath" %in% names( df ) ){
+          df <- dplyr::select( df, -displayPath )
+        }
+
         qry$analytic$param_table <- rbind(qry$analytic$param_table, df)
         prm <- res[[1]]
         save_table <- T
